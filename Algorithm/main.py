@@ -10,8 +10,12 @@ import time
 import os
 
 BINDINGS = {
-    b'a': 0,
-    b'd': 2}
+    b'c': 0,
+    b'a': 4,
+    b'd': 3,
+    b'w': 2,
+    b's': 5,
+    b' ': 1}
 SHARD_SIZE = 2000
 
 
@@ -25,15 +29,15 @@ def get_options():
     return args
 
 
-def run_recorder(opts):
+def run_recorder():#opts):
     """
     Runs the main recorder by binding certain discrete actions to keys.
     """
-    ddir = opts.data_directory
+    #ddir = opts.data_directory
 
     record_history = []  # The state action history buffer.
 
-    env = gym.make('MountainCar-v0')
+    env = gym.make('Centipede-v0')
     env._max_episode_steps = 1200
 
     ##############
@@ -95,12 +99,12 @@ def run_recorder(opts):
                     (shard_iter + 1) * SHARD_SIZE, len(sarsa_pairs))]
 
         shard_name = "{}_{}.npy".format(str(shard_iter), shard_suffix)
-        if not os.path.exists(ddir):
-            os.makedirs(ddir)
-        with open(os.path.join(ddir, shard_name), 'wb') as f:
+        if not os.path.exists("data\\"):
+            os.makedirs("data\\")
+        with open(os.path.join("data\\", shard_name), 'wb') as f:
             np.save(f, sarsa_pairs)
 
 
 if __name__ == "__main__":
-    opts = get_options()
-    run_recorder(opts)
+    #opts = get_options()
+    run_recorder()#opts)

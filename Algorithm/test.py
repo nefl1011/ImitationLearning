@@ -16,10 +16,13 @@ def main():
         while not done:  # Start with while True
             env.render()
 
-            action = env.action_space.sample()
+            action = env.action_space.sample()#env.action_space.sample()
             obs, reward, done, info = env.step(action)
 
-            print(obs)
+            print("obs: " + str(obs))
+            #print("reward: " + reward)
+            #print("done: " + done)
+            #print("info: " + info)
 
 
 if __name__ == '__main__':
