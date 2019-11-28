@@ -5,7 +5,14 @@ import sys
 import gym
 import time
 
-env = gym.make('Centipede-v0' if len(sys.argv) < 2 else sys.argv[1])
+import numpy as np
+
+from bc_model import BCModel
+
+# Use Centipede RAM version 4 (latest)
+# observation_space: 128
+# action_space: 18 (6 nedded)
+env = gym.make('Centipede-ram-v4' if len(sys.argv) < 2 else sys.argv[1])
 
 if not hasattr(env.action_space, 'n'):
     raise Exception('Keyboard agent only supports discrete action spaces')
@@ -45,7 +52,7 @@ def key_press(key, mod):
         a = 1  # space
     else:
         a = 0  # everything else
-    print(key)
+
     if a <= 0 or a >= ACTIONS: return
     human_agent_action = a
 
@@ -68,14 +75,18 @@ def key_release(key, mod):
     if human_agent_action == a:
         human_agent_action = 0
 
+
 def rollout(env):
     global human_agent_action, human_wants_restart, human_sets_pause
     human_wants_restart = False
-    obser = env.reset()
+    obs = env.reset()
     skip = 0
     total_reward = 0
     total_timesteps = 0
-    while 1:
+    states, actions = [], []
+    bc_model = BCModel(env)
+
+    while True:
         if not skip:
             # print("taking action {}".format(human_agent_action))
             a = human_agent_action
@@ -84,12 +95,24 @@ def rollout(env):
         else:
             skip -= 1
 
-        obser, r, done, info = env.step(a)
-        if r != 0:
-            print("reward %0.3f" % r)
+        # sarsa --> for markov decision process
+        # sarsa = (obs, human_agent_action) # tuple
+
+        states.append(obs)  # save observation as state
+        actions.append(a)  # save action as action
+        # print((obs, a))
+
+        obs, r, done, info = env.step(a)  # update obs, r, done and info with new action
+
+        # if r != 0:
+        # print("reward %0.3f" % r)
         total_reward += r
         window_still_open = env.render()
-        if window_still_open == False: return False
+        if window_still_open == False:
+            # labeling --> actions onehot encoding
+            bc_model.train_data(np.asarray(states, dtype=np.float32), actions, 1200, 128)
+
+            return False
         if done: break
         if human_wants_restart: break
         while human_sets_pause:
@@ -98,7 +121,8 @@ def rollout(env):
 
         # time.sleep(0.1) render a frame after 0.1 seconds
         time.sleep(0.025)
-    print("timesteps %i reward %0.2f" % (total_timesteps, total_reward))
+
+    # print("timesteps %i reward %0.2f" % (total_timesteps, total_reward))
 
 
 def main(args):
