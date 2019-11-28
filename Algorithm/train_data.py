@@ -122,7 +122,7 @@ def rollout(env):
         # time.sleep(0.1) render a frame after 0.1 seconds
         time.sleep(0.025)
 
-    # print("timesteps %i reward %0.2f" % (total_timesteps, total_reward))
+    print("timesteps %i reward %0.2f" % (total_timesteps, total_reward))
 
 
 def main(args):
