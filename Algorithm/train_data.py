@@ -4,9 +4,11 @@ import argparse
 import sys
 import gym
 import time
+import random
 
 import numpy as np
 
+import bc_model
 from bc_model import BCModel
 
 # Use Centipede RAM version 4 (latest)
@@ -76,15 +78,89 @@ def key_release(key, mod):
         human_agent_action = 0
 
 
-def rollout(env):
+def nn_tau_distance(states, current_state):
+    ds = np.sum((states[:len(states)] - current_state) ** 2, axis=1)  # L2 distance
+    ix = np.argsort(ds)  # sorts ascending by distance
+    return np.mean(ix) * 3  # paper tau_distance
+
+
+def tau_confidence(states, actions, bc_model):
+    training_states_set = []
+    training_actions_set = []
+    test_states_set = []
+    test_actions_set = []
+
+    # devide into training_set and test_set
+    for i in range(0, len(states) - 1):
+        x = random.random()
+        s = states[i]
+        a = actions[i]
+        if x < 0.5:
+            training_states_set.append(s)
+            training_actions_set.append(a)
+        else:
+            test_states_set.append(s)
+            test_actions_set.append(a)
+
+    # train new model
+    bc_model.train_data(np.asarray(training_states_set, dtype=np.int32), training_actions_set, 0, 0)
+
+    # get misclassified
+    misclassified = []
+    for cx in range(0, len(test_actions_set) - 1):
+        action_p, c_p = bc_model.get_predicted_action_and_probability(test_states_set[cx])
+        #  print("a_p: %d, test: %d, c: %f" %(action_p, test_actions_set[cx], c_p))
+
+        if test_actions_set[cx] != action_p:
+            misclassified.append(c_p)
+
+    return np.mean(misclassified)
+
+def initialization(env):
     global human_agent_action, human_wants_restart, human_sets_pause
-    human_wants_restart = False
-    obs = env.reset()
-    skip = 0
-    total_reward = 0
-    total_timesteps = 0
     states, actions = [], []
     bc_model = BCModel(env)
+
+    t_conf = np.math.inf
+    t_dist = 0
+
+    obs = env.reset()
+    skip = 0
+    while True:
+        if not skip:
+            # print("taking action {}".format(human_agent_action))
+            a = human_agent_action
+            skip = SKIP_CONTROL
+        else:
+            skip -= 1
+
+        # tau_distance = nn_tau_distance(states, obs)
+        states.append(obs)
+        actions.append(a)
+        obs, r, done, info = env.step(a)
+
+        env.render()
+        if human_wants_restart:
+            bc_model.train_data(np.asarray(states, dtype=np.float32), actions, 1200, 128)
+            break
+
+        time.sleep(0.025)
+    t_conf = tau_confidence(states, actions, bc_model)
+    return states, actions, bc_model, t_conf, t_dist
+
+
+
+def rollout(env):
+    # initilization
+    global human_agent_action, human_wants_restart, human_sets_pause
+    human_wants_restart = False
+    skip = 0
+    total_timesteps = 0
+
+    states, actions, bc_model, t_conf, t_dist = initialization(env)
+    human_wants_restart = False
+    print("rollout")
+    obs = env.reset()
 
     while True:
         if not skip:
@@ -104,16 +180,13 @@ def rollout(env):
 
         obs, r, done, info = env.step(a)  # update obs, r, done and info with new action
 
-        # if r != 0:
-        # print("reward %0.3f" % r)
-        total_reward += r
         window_still_open = env.render()
         if window_still_open == False:
             # labeling --> actions onehot encoding
-            bc_model.train_data(np.asarray(states, dtype=np.float32), actions, 1200, 128)
-
+            print(tau_confidence(states, actions, bc_model))
+            # bc_model.train_data(np.asarray(states, dtype=np.float32), actions, 1200, 128)
             return False
-        if done: break
+        #  if done: break
         if human_wants_restart: break
         while human_sets_pause:
             env.render()
@@ -122,7 +195,7 @@ def rollout(env):
         # time.sleep(0.1) render a frame after 0.1 seconds
         time.sleep(0.025)
 
-    print("timesteps %i reward %0.2f" % (total_timesteps, total_reward))
+    print("timesteps %i" % (total_timesteps))
 
 
 def main(args):
