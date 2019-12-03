@@ -29,7 +29,7 @@
   <component name="ProjectId" id="1SQEZ8v6nPiHwqn0cngWYGC5Xnn" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="C:/Program Files/Git/bin/git.exe" />
+    <property name="last_opened_file_path" value="$USER_HOME$/Desktop/Reinforcement-Learning-Tutorial-master/ddqn space" />
     <property name="settings.editor.selected.configurable" value="vcs.Git" />
   </component>
   <component name="RecentsManager">
@@ -201,7 +201,14 @@
       <option name="project" value="LOCAL" />
       <updated>1574957548164</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="changed to svm and calculate t_conf">
+      <created>1575037788168</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1575037788168</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -250,6 +257,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="commit" />
     <MESSAGE value="Added simple model which can train" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added simple model which can train" />
+    <MESSAGE value="changed to svm and calculate t_conf" />
+    <option name="LAST_COMMIT_MESSAGE" value="changed to svm and calculate t_conf" />
   </component>
 </project>

@@ -22,6 +22,7 @@ ACTIONS = env.action_space.n
 SKIP_CONTROL = 0  # Use previous control decision SKIP_CONTROL times, that's how you can test what skip is still usable.
 
 human_agent_action = 0
+expert_is_teaching = False
 human_wants_restart = False
 human_sets_pause = False
 
@@ -39,7 +40,8 @@ def argparser():
 
 
 def key_press(key, mod):
-    global human_agent_action, human_wants_restart, human_sets_pause
+    global human_agent_action, human_wants_restart, human_sets_pause, expert_is_teaching
+    expert_is_teaching = True
     if key == 65293: human_wants_restart = True  # enter
     if key == 112: human_sets_pause = not human_sets_pause  # p
     if key == 97 or key == 65361:
@@ -60,7 +62,8 @@ def key_press(key, mod):
 
 
 def key_release(key, mod):
-    global human_agent_action
+    global human_agent_action, expert_is_teaching
+    expert_is_teaching = False
     if key == 97 or key == 65361:
         a = 4  # a
     elif key == 100 or key == 65363:
@@ -79,9 +82,13 @@ def key_release(key, mod):
 
 
 def nn_tau_distance(states, current_state):
-    ds = np.sum((states[:len(states)] - current_state) ** 2, axis=1)  # L2 distance
-    ix = np.argsort(ds)  # sorts ascending by distance
+    ix = nearest_neighbor(states, current_state)
     return np.mean(ix) * 3  # paper tau_distance
+
+
+def nearest_neighbor(states, current_state):
+    ds = np.sum((states[:len(states)] - current_state) ** 2, axis=1)  # L2 distance
+    return np.argsort(ds)  # sorts ascending by distance
 
 
 def tau_confidence(states, actions, bc_model):
@@ -102,9 +109,6 @@ def tau_confidence(states, actions, bc_model):
             test_states_set.append(s)
             test_actions_set.append(a)
 
-    # train new model
-    bc_model.train_data(np.asarray(training_states_set, dtype=np.int32), training_actions_set, 0, 0)
-
     # get misclassified
     misclassified = []
     for cx in range(0, len(test_actions_set) - 1):
@@ -116,6 +120,7 @@ def tau_confidence(states, actions, bc_model):
 
     return np.mean(misclassified)
 
+
 def initialization(env):
     global human_agent_action, human_wants_restart, human_sets_pause
     states, actions = [], []
@@ -125,34 +130,33 @@ def initialization(env):
     t_dist = 0
 
     obs = env.reset()
+
     skip = 0
     while True:
         if not skip:
-            # print("taking action {}".format(human_agent_action))
             a = human_agent_action
             skip = SKIP_CONTROL
         else:
             skip -= 1
 
-        # tau_distance = nn_tau_distance(states, obs)
         states.append(obs)
         actions.append(a)
         obs, r, done, info = env.step(a)
 
         env.render()
         if human_wants_restart:
-            bc_model.train_data(np.asarray(states, dtype=np.float32), actions, 1200, 128)
             break
 
         time.sleep(0.025)
+
+    bc_model.train_data(np.asarray(states, dtype=np.float32), actions, 1200, 128)
     t_conf = tau_confidence(states, actions, bc_model)
     return states, actions, bc_model, t_conf, t_dist
 
 
-
 def rollout(env):
     # initilization
-    global human_agent_action, human_wants_restart, human_sets_pause
+    global human_agent_action, human_wants_restart, human_sets_pause, expert_is_teaching
     human_wants_restart = False
     skip = 0
     total_timesteps = 0
@@ -161,32 +165,44 @@ def rollout(env):
     human_wants_restart = False
     print("rollout")
     obs = env.reset()
+    agent, human = 0, 0
 
     while True:
-        if not skip:
-            # print("taking action {}".format(human_agent_action))
-            a = human_agent_action
-            total_timesteps += 1
-            skip = SKIP_CONTROL
+        done = False
+        a_p, c_p = bc_model.get_predicted_action_and_probability(obs)
+        #  t_dist = nn_tau_distance(states, obs)
+        if c_p > t_conf:  # & nearest_neighbor(states, obs)[0] < nn_tau_distance(states, obs):
+            agent += 1
+            a = a_p
+            obs, r, done, info = env.step(a)
+
         else:
-            skip -= 1
+            # todo pause
+            human += 1
+            print("Expert needed")
 
-        # sarsa --> for markov decision process
-        # sarsa = (obs, human_agent_action) # tuple
+            if not skip:
+                a = human_agent_action
+                total_timesteps += 1
+                skip = SKIP_CONTROL
+            else:
+                skip -= 1
 
-        states.append(obs)  # save observation as state
-        actions.append(a)  # save action as action
-        # print((obs, a))
-
-        obs, r, done, info = env.step(a)  # update obs, r, done and info with new action
+            if a != 0:
+                states.append(obs)  # save observation as state
+                actions.append(a)  # save action as action
+                bc_model.train_data(np.asarray(states, dtype=np.float32), actions, 1200, 128)
+                t_conf = tau_confidence(states, actions, bc_model)
+                obs, r, done, info = env.step(a)
 
         window_still_open = env.render()
         if window_still_open == False:
             # labeling --> actions onehot encoding
+            print(human / agent)
             print(tau_confidence(states, actions, bc_model))
             # bc_model.train_data(np.asarray(states, dtype=np.float32), actions, 1200, 128)
             return False
-        #  if done: break
+        if done: env.reset()
         if human_wants_restart: break
         while human_sets_pause:
             env.render()

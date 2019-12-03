@@ -21,7 +21,6 @@ class BCModel:
     def create_model(self):
         print("creating the model");
 
-        # todo svm
         model = svm.SVC(gamma='scale', probability=True)
 
         #  model = Sequential()
@@ -40,6 +39,7 @@ class BCModel:
     def train_data(self, data, labels, iterations, batch_size):
         print("training data")
         self.model.fit(data, labels)
+        print("finished")
         # print(data[0])
         #self.model.fit(data, labels, iterations, batch_size)
         #self.model.evaluate()
@@ -48,30 +48,8 @@ class BCModel:
         s = [np.asarray(state, dtype=np.float32)]
         prediction = self.model.predict(s)
         proba = self.model.predict_proba(s)
-        #  print(proba)
-        return prediction[0], proba[0][prediction[0]]
+        # print("predict action %d with probability %f" %(prediction, np.max(proba[0])))
+        return prediction, np.max(proba[0])
 
     def save_data(self):
         print("save data into directory: " + self.save_dir)
-
-    def create_model2(self):
-        """
-        Creates the model.
-        """
-        state_ph = tf.placeholder(tf.float32, shape=[None, 128])
-        # Process the data
-
-        # # Hidden neurons
-        with tf.variable_scope("layer1"):
-            hidden = tf.layers.dense(state_ph, 128, activation=tf.nn.relu)
-
-        with tf.variable_scope("layer2"):
-            hidden = tf.layers.dense(hidden, 128, activation=tf.nn.relu)
-        # Make output layers
-        with tf.variable_scope("layer3"):
-            logits = tf.layers.dense(hidden, 128)
-            # Take the action with the highest activation
-        with tf.variable_scope("output"):
-            action = tf.argmax(input=logits, axis=1)
-
-        return state_ph, action, logits
