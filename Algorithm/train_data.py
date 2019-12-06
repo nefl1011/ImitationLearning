@@ -191,6 +191,7 @@ def rollout(env):
             if a != 0:
                 states.append(obs)  # save observation as state
                 actions.append(a)  # save action as action
+                # todo train model after each rollout
                 bc_model.train_data(np.asarray(states, dtype=np.float32), actions, 1200, 128)
                 t_conf = tau_confidence(states, actions, bc_model)
                 obs, r, done, info = env.step(a)

@@ -1,3 +1,4 @@
+import cv2
 import tensorflow as tf
 import numpy as np
 from keras import Sequential
@@ -17,6 +18,14 @@ class BCModel:
         self.env = env
         self.input_shape = (128,)
         self.model = self.create_model()
+
+        # A buffer that keeps the last 3 images
+        self.process_buffer = []
+        # Initialize buffer with the first frame
+        #s1, r1, _, _ = self.env.step(0)
+        #s2, r2, _, _ = self.env.step(0)
+        #s3, r3, _, _ = self.env.step(0)
+        #self.process_buffer = [s1, s2, s3]
 
     def create_model(self):
         print("creating the model");
@@ -53,3 +62,10 @@ class BCModel:
 
     def save_data(self):
         print("save data into directory: " + self.save_dir)
+
+    def convert_process_buffer(self):
+        """Converts the list of NUM_FRAMES images in the process buffer
+        into one training sample"""
+        black_buffer = [cv2.resize(cv2.cvtColor(x, cv2.COLOR_RGB2GRAY), (84, 90)) for x in self.process_buffer]
+        black_buffer = [x[1:85, :, np.newaxis] for x in black_buffer]
+        return np.concatenate(black_buffer, axis=2)

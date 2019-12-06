@@ -2,8 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="82fd33ed-6bb6-47dc-91ba-4600227d4ee0" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/Agent.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DQNetwork.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bc_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/bc_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/confidence" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gym_test.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/train_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_data.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -53,7 +58,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.train_data">
+  <component name="RunManager" selected="Python.main">
     <configuration name="demo" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Algorithm" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -161,8 +166,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.train_data" />
         <item itemvalue="Python.main" />
+        <item itemvalue="Python.train_data" />
         <item itemvalue="Python.test" />
         <item itemvalue="Python.demo" />
         <item itemvalue="Python.gym_test" />
@@ -208,7 +213,14 @@
       <option name="project" value="LOCAL" />
       <updated>1575037788168</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="ready to change">
+      <created>1575390521984</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1575390521984</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -258,6 +270,7 @@
     <MESSAGE value="commit" />
     <MESSAGE value="Added simple model which can train" />
     <MESSAGE value="changed to svm and calculate t_conf" />
-    <option name="LAST_COMMIT_MESSAGE" value="changed to svm and calculate t_conf" />
+    <MESSAGE value="ready to change" />
+    <option name="LAST_COMMIT_MESSAGE" value="ready to change" />
   </component>
 </project>
