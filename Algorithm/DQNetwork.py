@@ -1,6 +1,6 @@
 import numpy as np
 from keras.models import Sequential
-from keras.layers import Conv2D, Flatten, Dense
+from keras.layers import Conv2D, Flatten, Dense, Activation
 
 
 class DQNetwork:
@@ -23,9 +23,10 @@ class DQNetwork:
                               data_format="channels_first"))
         self.model.add(Flatten())
         self.model.add(Dense(512, activation="relu"))
-        self.model.add(Dense(self.action_space))
-        self.model.compile(loss="mean_squared_error", optimizer="rmsprop", metrics=["accuracy"])
-        self.model.summary()  # prints model in console
+        self.model.add(Dense(self.action_space))# Dense(self.action_space, activation="sigmoid"))
+        # self.model.add(Activation('softmax'))
+        self.model.compile(loss="mean_squared_error", optimizer="rmsprop", metrics=["accuracy"])# (loss="mean_squared_error", optimizer="rmsprop", metrics=["accuracy"])
+        # self.model.summary()  # prints model in console
 
     def train(self, batch, DQN_target):
         x_train = []
@@ -49,7 +50,7 @@ class DQNetwork:
         x_train = np.asarray(x_train).squeeze()
         target_train = np.asarray(target_train).squeeze()
 
-        self.model.fit(x_train, target_train, batch_size=self.minibatch_size, nb_epoch=1)
+        self.model.fit(x_train, target_train, batch_size=self.minibatch_size, epochs=100)
 
     def predict(self, state):
         state = state.astype(np.float64)

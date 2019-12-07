@@ -70,98 +70,24 @@ def key_release(key, mod):
     if human_agent_action == a:
         human_agent_action = 0
 
-
-def rollout(env, agent):
-    # initilization
-    global human_agent_action, human_wants_restart, human_sets_pause, expert_is_teaching
-    human_wants_restart = False
-    skip = 0
-    total_timesteps = 0
-
-    human_wants_restart = False
-    print("rollout")
-    obs = env.reset()
-    agent, human = 0, 0
-
-    while True:
-        done = False
-        #  t_dist = nn_tau_distance(states, obs)
-        if c_p > t_conf:  # & nearest_neighbor(states, obs)[0] < nn_tau_distance(states, obs):
-            agent += 1
-            obs, r, done, info = env.step(a)
-
-        else:
-            # todo pause
-            human += 1
-            print("Expert needed")
-
-            if not skip:
-                a = human_agent_action
-                total_timesteps += 1
-                skip = SKIP_CONTROL
-            else:
-                skip -= 1
-
-            if a != 0:
-                # todo train model after each rollout
-                obs, r, done, info = env.step(a)
-
-        window_still_open = env.render()
-        if window_still_open == False:
-            return False
-        if done:
-            env.reset()
-        if human_wants_restart:
-            break
-        while human_sets_pause:
-            env.render()
-            time.sleep(0.1)
-
-        # time.sleep(0.1) render a frame after 0.1 seconds
-        time.sleep(0.025)
-
-    print("timesteps %i" % (total_timesteps))
-
 def preprocess_observation(obs, img_size):
     image = Image.fromarray(obs, 'RGB').convert('L').resize(img_size)
     return np.asarray(image.getdata(), dtype=np.uint8).reshape(image.size[1], image.size[0])
 
-def main(args):
 
-    env = gym.make('Centipede-v4')
-    env.render()
-    # set key listener
-    env.unwrapped.viewer.window.on_key_press = key_press
-    env.unwrapped.viewer.window.on_key_release = key_release
-
-
-    print("Press keys w a s d or arrow-keys to move")
-    print("Press space to shoot")
-    print("No keys pressed is taking action 0 --> no action")
-    print("\nGood Luck!")
-
-    input_shape = (4, 110, 84) # formated image
-    discount_factor = 0.9
-    minibatch_size = 32
-    replay_memory_size = 1024
+def expert_demonstration(max_expert_rollouts, agent, img_size, update_freq, target_network_update_freq,
+                         replay_start_size):
     img_size = (84, 110)
-
-    agent = Agent(input_shape, env.action_space.n, discount_factor, minibatch_size, replay_memory_size)
-
-    max_epochs = 5
-    max_episode_in_epoch = 100
-    epoch = 0
-
-    while epoch < max_epochs:
+    for i in range(0, max_expert_rollouts):
         score = 0
         obs = preprocess_observation(env.reset(), img_size)
         current_state = np.array([obs, obs, obs, obs])
+        frame = 0
 
-        episode = 0
-
-        while episode < max_episode_in_epoch:
+        done = False
+        while not done:
             env.render()
-            action = agent.get_action(np.asarray([current_state]))
+            action = human_agent_action
             obs, r, done, info = env.step(action)
             obs = preprocess_observation(obs, img_size)
 
@@ -172,10 +98,150 @@ def main(args):
 
             current_state = next_state
             score += r
-            episode += 1
 
-        epoch += 1
+            frame += 1
+            if frame % update_freq == 0 and len(agent.experiences) >= replay_start_size:
+                frame = 0
+                agent.train()
+                if agent.training_count % target_network_update_freq == 0 and agent.training_count >= target_network_update_freq:
+                    agent.reset_target_network()
 
+            time.sleep(0.035)
+
+        print("Total score: %d" % (score))
+        agent.train()
+
+
+def main(args):
+    global human_agent_action, human_wants_restart, human_sets_pause
+
+    env = gym.make('Centipede-v4')
+    env.render()
+    # set key listener
+    env.unwrapped.viewer.window.on_key_press = key_press
+    env.unwrapped.viewer.window.on_key_release = key_release
+
+    print("Press keys w a s d or arrow-keys to move")
+    print("Press space to shoot")
+    print("No keys pressed is taking action 0 --> no action")
+    print("\nGood Luck!")
+
+    input_shape = (4, 110, 84)  # formated image
+    discount_factor = 0.9
+    minibatch_size = 32
+    replay_memory_size = 1000000
+    img_size = (84, 110)
+
+    agent = Agent(input_shape, env.action_space.n, discount_factor, minibatch_size, replay_memory_size)
+
+    max_episodes = 10
+    max_episode_length = 10000000
+    episode = 0
+
+    # pretrain from expert
+    # expert_demonstration(10, agent, img_size, 4, 10000, 50000)
+    max_expert_rollouts = 5
+    update_freq = 4
+    replay_start_size = 1000
+    target_network_update_freq = 10000
+
+    for i in range(0, max_expert_rollouts):
+        score = 0
+        obs = preprocess_observation(env.reset(), img_size)
+        current_state = np.array([obs, obs, obs, obs])
+        frame = 0
+
+        done = False
+        while not done:
+            env.render()
+            action = human_agent_action
+            obs, r, done, info = env.step(action)
+            obs = preprocess_observation(obs, img_size)
+
+            next_state = np.array([current_state[1], current_state[2], current_state[3], obs])
+
+            clipped_reward = np.clip(r, -1, 1)
+            agent.add_experience(np.asarray([current_state]), action, clipped_reward, np.asarray([next_state]), done)
+
+            current_state = next_state
+            score += r
+
+            frame += 1
+            time.sleep(0.035)
+            """
+            if frame % update_freq == 0 and len(agent.experiences) >= replay_start_size:
+                frame = 0
+                agent.train()
+                if agent.epochs % target_network_update_freq == 0 and agent.epochs % target_network_update_freq == 0:
+                    agent.reset_target_network()
+            else:
+                time.sleep(0.035)"""
+
+        print("Total score: %d" % (score))
+        agent.train()
+
+
+    while episode < max_episodes:
+        env.reset()
+        score = 0
+        obs = preprocess_observation(env.reset(), img_size)
+        current_state = np.array([obs, obs, obs, obs])
+        frame = 0
+        t_conf = agent.get_action_confidence(np.asarray([current_state]))
+
+        while frame < max_episode_length:
+            env.render()
+
+            if t_conf >= agent.get_confidence():
+                action = agent.get_action(np.asarray([current_state]))
+                obs, r, done, info = env.step(action)
+                obs = preprocess_observation(obs, img_size)
+
+                next_state = np.array([current_state[1], current_state[2], current_state[3], obs])
+            """
+            else:
+
+                done = False
+                while not human_wants_restart:
+                    print("Waiting for human interaction!")
+                    if human_wants_restart:
+                        human_wants_restart = False
+                        break
+                    else:
+                        time.sleep(3)
+
+                human_wants_restart = False
+                while not done:
+                    if human_wants_restart:
+                        break
+
+                    env.render()
+                    action = human_agent_action
+                    obs, r, done, info = env.step(action)
+                    obs = preprocess_observation(obs, img_size)
+
+                    next_state = np.array([current_state[1], current_state[2], current_state[3], obs])
+
+                    clipped_reward = np.clip(r, -1, 1)
+                    agent.add_experience(np.asarray([current_state]), action, clipped_reward, np.asarray([next_state]),
+                                         done)
+
+                    current_state = next_state
+                    score += r
+
+                    frame += 1
+                    time.sleep(0.035)
+
+                print("Total score: %d" % (score))
+                agent.train()
+                agent.reset_target_network()
+                t_conf = agent.get_action_confidence(np.asarray([current_state]))"""
+
+            current_state = next_state
+            score += r
+            frame += 1
+
+        episode += 1
 
 
 if __name__ == '__main__':

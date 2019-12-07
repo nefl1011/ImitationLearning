@@ -30,8 +30,11 @@ class Agent:
     def get_action(self, state):
         return np.argmax(self.network.predict(state))
 
+    def get_action_confidence(self, state):
+        return np.max(self.network.predict(state))
+
     def get_max_q(self, state):
-        q_values = self.network.predict()
+        q_values = self.network.predict(state)
         idxs = np.argwhere(q_values == np.max(q_values)).ravel()
         return np.random.choice(idxs)
 
@@ -61,6 +64,14 @@ class Agent:
 
     def get_confidence(self):
         batch = self.sample_batch()
+        wrong_classified = []
+        for datapoint in batch:
+            action = self.get_action(datapoint['source'].astype(np.float64))
+            if action != datapoint['action']:
+                wrong_classified.append(self.get_action_confidence(datapoint['source'].astype(np.float64)))
+        if len(wrong_classified) == 0:
+            return 0
+        return np.mean(wrong_classified)
 
     def save(self):
         self.network.save(append='_x')
