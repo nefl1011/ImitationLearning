@@ -2,9 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="82fd33ed-6bb6-47dc-91ba-4600227d4ee0" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/dagger.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gym_torcs.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/snakeoil3_gym.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CNN.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/WaitThread.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Agent.py" beforeDir="false" afterPath="$PROJECT_DIR$/Agent.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DQNetwork.py" beforeDir="false" afterPath="$PROJECT_DIR$/DQNetwork.py" afterDir="false" />
@@ -33,7 +32,7 @@
   <component name="ProjectId" id="1SQEZ8v6nPiHwqn0cngWYGC5Xnn" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$USER_HOME$/Desktop/Reinforcement-Learning-Tutorial-master/ddqn space" />
     <property name="settings.editor.selected.configurable" value="vcs.Git" />
   </component>
   <component name="RecentsManager">
@@ -219,7 +218,14 @@
       <option name="project" value="LOCAL" />
       <updated>1575390521984</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="added DQN">
+      <created>1575652700176</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1575652700176</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -270,6 +276,7 @@
     <MESSAGE value="Added simple model which can train" />
     <MESSAGE value="changed to svm and calculate t_conf" />
     <MESSAGE value="ready to change" />
-    <option name="LAST_COMMIT_MESSAGE" value="ready to change" />
+    <MESSAGE value="added DQN" />
+    <option name="LAST_COMMIT_MESSAGE" value="added DQN" />
   </component>
 </project>
