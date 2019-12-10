@@ -2,11 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="82fd33ed-6bb6-47dc-91ba-4600227d4ee0" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/CNN.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/WaitThread.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Agent.py" beforeDir="false" afterPath="$PROJECT_DIR$/Agent.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DQNetwork.py" beforeDir="false" afterPath="$PROJECT_DIR$/DQNetwork.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -225,7 +221,14 @@
       <option name="project" value="LOCAL" />
       <updated>1575652700176</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Algorithm pauses during switch between agent and expert.">
+      <created>1575976914048</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1575976914048</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -277,6 +280,7 @@
     <MESSAGE value="changed to svm and calculate t_conf" />
     <MESSAGE value="ready to change" />
     <MESSAGE value="added DQN" />
-    <option name="LAST_COMMIT_MESSAGE" value="added DQN" />
+    <MESSAGE value="Algorithm pauses during switch between agent and expert." />
+    <option name="LAST_COMMIT_MESSAGE" value="Algorithm pauses during switch between agent and expert." />
   </component>
 </project>

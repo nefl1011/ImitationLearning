@@ -24,6 +24,7 @@ human_sets_pause = False
 
 
 def argparser():
+    # todo argparser
     parser = argparse.ArgumentParser()
     parser.add_argument('--savedir', help='name of directory to save model', default='data')
     parser.add_argument('--max_to_keep', help='number of models to save', default=10, type=int)
@@ -241,6 +242,7 @@ def main(args):
             time.sleep(0.035)
 
         print("Total score: %d" % (score))
+        # todo train at the end of an episode
         episode += 1
 
 
