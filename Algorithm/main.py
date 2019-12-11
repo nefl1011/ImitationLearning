@@ -22,7 +22,7 @@ def argparser():
     parser.add_argument('--savedir', help='name of directory to save model', default='data')
     parser.add_argument('--minibatch_size', default=32, type=int)
     parser.add_argument('--replay_memory_size', default=1000000, type=int)
-    parser.add_argument('--discount_factor', default=0.9, type=float)
+    parser.add_argument('--discount_factor', default=0.99, type=float)
     parser.add_argument('--cnn_mode', default='DQN', type=str)
     parser.add_argument('--max_episodes', default=10, type=int)
     parser.add_argument('--max_pretraining_rollouts', default=1, type=int)
@@ -115,7 +115,6 @@ def main(args):
         while not done:
             window_still_open = env.render()
             if not window_still_open:
-                # todo save expert rollouts
                 return
 
             action = human_agent_action
@@ -133,7 +132,10 @@ def main(args):
             frame += 1
             time.sleep(0.035)
 
+        if i == 5 or i == 10 or i == 100 or i % 200 == 0:
+            agent.save_experiences(i)
         print("Total score: %d" % (score))
+
 
     # train pretrained session
     if max_expert_rollouts > 0:
@@ -159,6 +161,7 @@ def main(args):
         while not done and t_conf < conf:
             window_still_open = env.render()
             if not window_still_open:
+                agent.save_model()
                 return
 
             action = agent.get_action(np.asarray([current_state]))

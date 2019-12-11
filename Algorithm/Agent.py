@@ -25,12 +25,8 @@ class Agent:
 
         if self.mode is "DQN":
             self.network = DQNetwork(self.input_shape, self.action_space, self.discount_factor, self.minibatch_size)
-            self.target_network = DQNetwork(self.input_shape, self.action_space, self.discount_factor, self.minibatch_size)
-            self.target_network.model.set_weights(self.network.model.get_weights())
         else:
             self.network = CNN(self.input_shape, self.action_space, self.discount_factor, self.minibatch_size)
-
-
 
     def get_action(self, state):
         return np.argmax(self.network.predict(state))
@@ -63,10 +59,10 @@ class Agent:
                                  'final': final})
 
         self.new_experiences.append({'source': source,
-                                 'action': action,
-                                 'reward': reward,
-                                 'dest': dest,
-                                 'final': final})
+                                     'action': action,
+                                     'reward': reward,
+                                     'dest': dest,
+                                     'final': final})
 
     def sample_batch(self):
         batch = []
@@ -80,14 +76,9 @@ class Agent:
             batch = self.new_experiences
         else:
             batch = self.sample_batch()
-        if self.mode == "DQN":
-            self.network.train(batch, self.target_network)
-        else:
-            self.network.train(batch)
-        self.new_experiences = []
 
-    def reset_target_network(self):
-        self.target_network.model.set_weights(self.network.model.get_weights)
+        self.network.train(batch)
+        self.new_experiences = []
 
     def get_tau_confidence(self):
         if len(self.experiences) == 0:
@@ -103,7 +94,16 @@ class Agent:
             return 0
         return np.mean(wrong_classified)
 
-    def save(self):
-        self.network.save(append='_x')
-        if self.mode == "DQN":
-            self.target_network.save(append='_target')
+    def save_model(self):
+        safestring = "_%d_%s" % (self.epochs, self.mode)
+        self.network.save(append=safestring)
+
+    def save_experiences(self, iteration, pretrains=False):
+        if pretrains:
+            safestring = "_pretraining_%d_%s" % (iteration, self.mode)
+        else:
+            safestring = "_%d_%s" % (iteration, self.mode)
+        np.save("data/experiences/experiences%s.npy" % safestring, self.experiences)
+
+    def load_experiences(self, load_string):
+        self.experiences = np.load(load_string, allow_pickle=True)

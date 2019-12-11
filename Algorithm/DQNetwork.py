@@ -23,12 +23,11 @@ class DQNetwork:
                               data_format="channels_first"))
         self.model.add(Flatten())
         self.model.add(Dense(512, activation="relu"))
-        self.model.add(Dense(self.action_space))# Dense(self.action_space, activation="sigmoid"))
-        # self.model.add(Activation('softmax'))
-        self.model.compile(loss="mean_squared_error", optimizer="rmsprop", metrics=["accuracy"])# (loss="mean_squared_error", optimizer="rmsprop", metrics=["accuracy"])
-        # self.model.summary()  # prints model in console
+        self.model.add(Dense(self.action_space))
+        self.model.compile(loss="mean_squared_error", optimizer="rmsprop", metrics=["accuracy"])
+        # self.model.summary()
 
-    def train(self, batch, DQN_target):
+    def train(self, batch):
         x_train = []
         target_train = []
 
@@ -36,7 +35,7 @@ class DQNetwork:
             x_train.append(datapoint['source'].astype(np.float64))
 
             next_state = datapoint['dest'].astype(np.float64)
-            next_state_predicition = DQN_target.predict(next_state).ravel()
+            next_state_predicition = self.model.predict(next_state).ravel()
             next_q_value = np.max(next_state_predicition)
 
             t = list(self.predict(datapoint['source'])[0])
@@ -56,10 +55,8 @@ class DQNetwork:
         state = state.astype(np.float64)
         return self.model.predict(state, batch_size=1)
 
-    # todo Boltzmann annäherung implementieren für confidenz
-
     def save(self, filename=None, append=""):
-        f = ('model%s.h5' % append) if filename is None else filename
+        f = ('data/models/model%s.h5' % append) if filename is None else filename
         self.model.save_weights(f)
 
     def load(self, path):
