@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="82fd33ed-6bb6-47dc-91ba-4600227d4ee0" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/Logger.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Statistic.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Agent.py" beforeDir="false" afterPath="$PROJECT_DIR$/Agent.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DQNetwork.py" beforeDir="false" afterPath="$PROJECT_DIR$/DQNetwork.py" afterDir="false" />
@@ -244,7 +246,14 @@
       <option name="project" value="LOCAL" />
       <updated>1575997356978</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="Saving network and experiences, and fixed DQN">
+      <created>1576064269455</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1576064269455</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -299,6 +308,7 @@
     <MESSAGE value="Algorithm pauses during switch between agent and expert." />
     <MESSAGE value="added todos" />
     <MESSAGE value="ArgumentParser added and algorithm is working" />
-    <option name="LAST_COMMIT_MESSAGE" value="ArgumentParser added and algorithm is working" />
+    <MESSAGE value="Saving network and experiences, and fixed DQN" />
+    <option name="LAST_COMMIT_MESSAGE" value="Saving network and experiences, and fixed DQN" />
   </component>
 </project>

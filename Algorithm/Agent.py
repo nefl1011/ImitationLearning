@@ -1,4 +1,5 @@
 import math
+import os
 from random import randrange
 
 import numpy as np
@@ -73,11 +74,11 @@ class Agent:
     def train(self, train_all=False):
         self.epochs += 1
         if train_all:
-            batch = self.new_experiences
+            batch = self.experiences
         else:
-            batch = self.sample_batch()
+            batch = self.new_experiences
 
-        self.network.train(batch)
+        self.losses, self. accs = self.network.train(batch)
         self.new_experiences = []
 
     def get_tau_confidence(self):
@@ -96,7 +97,10 @@ class Agent:
 
     def save_model(self):
         safestring = "_%d_%s" % (self.epochs, self.mode)
-        self.network.save(append=safestring)
+        self.network.save(append="")
+
+    def load_model(self, path):
+        self.network.load(path)
 
     def save_experiences(self, iteration, pretrains=False):
         if pretrains:
@@ -106,4 +110,4 @@ class Agent:
         np.save("data/experiences/experiences%s.npy" % safestring, self.experiences)
 
     def load_experiences(self, load_string):
-        self.experiences = np.load(load_string, allow_pickle=True)
+        self.experiences = np.load(load_string, allow_pickle=True).tolist()

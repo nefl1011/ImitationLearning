@@ -1,4 +1,7 @@
+import os
+
 import numpy as np
+from keras.engine.saving import load_model
 from keras.models import Sequential
 from keras.layers import Conv2D, Flatten, Dense, Activation
 
@@ -10,9 +13,6 @@ class DQNetwork:
         self.action_space = action_space
         self.discount_factor = discount_factor
         self.minibatch_size = minibatch_size
-
-        # DeepMind paper
-        # todo paper lesen!!!
 
         self.model = Sequential()
         self.model.add(Conv2D(32, 8, strides=(4, 4), padding="valid", activation="relu", input_shape=input_shape,
@@ -49,7 +49,11 @@ class DQNetwork:
         x_train = np.asarray(x_train).squeeze()
         target_train = np.asarray(target_train).squeeze()
 
-        self.model.fit(x_train, target_train, batch_size=self.minibatch_size, epochs=1)
+        fit = self.model.fit(x_train, target_train, batch_size=self.minibatch_size, epochs=1)
+
+        loss = fit.history["loss"][0]
+        accuracy = fit.history["acc"][0]
+        return loss, accuracy
 
     def predict(self, state):
         state = state.astype(np.float64)
@@ -57,7 +61,8 @@ class DQNetwork:
 
     def save(self, filename=None, append=""):
         f = ('data/models/model%s.h5' % append) if filename is None else filename
-        self.model.save_weights(f)
+        self.model.save(f)
 
     def load(self, path):
-        self.model.load_weights(path)
+        if os.path.exists(path):
+            self.model = load_model(path)
