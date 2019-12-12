@@ -3,8 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="82fd33ed-6bb6-47dc-91ba-4600227d4ee0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Agent.py" beforeDir="false" afterPath="$PROJECT_DIR$/Agent.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DQNetwork.py" beforeDir="false" afterPath="$PROJECT_DIR$/DQNetwork.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Statistic.py" beforeDir="false" afterPath="$PROJECT_DIR$/Statistic.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -258,7 +258,14 @@
       <option name="project" value="LOCAL" />
       <updated>1576157770556</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="Logger logs">
+      <created>1576164180555</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1576164180555</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -315,6 +322,7 @@
     <MESSAGE value="ArgumentParser added and algorithm is working" />
     <MESSAGE value="Saving network and experiences, and fixed DQN" />
     <MESSAGE value="Added Logger" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added Logger" />
+    <MESSAGE value="Logger logs" />
+    <option name="LAST_COMMIT_MESSAGE" value="Logger logs" />
   </component>
 </project>

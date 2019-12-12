@@ -39,9 +39,9 @@ class Statistic:
         with open(input_path, "r") as scores:
             reader = csv.reader(scores)
             data = list(reader)
-            for i in range(0, len(data)):
+            for i in range(0, len(data)-1):
                 x.append(float(i) * small_batch_length)
-                y.append(float(data[i][0]))
+                y.append(float(data[0][i]))
 
         plt.subplots()
         plt.plot(x, y, label="last " + str(small_batch_length) + " average")

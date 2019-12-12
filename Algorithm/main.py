@@ -8,10 +8,10 @@ import time
 import numpy as np
 from PIL import Image
 
-import Logger
+from Logger import Logger
 from Agent import Agent
 
-env = gym.make('Centipede-ram-v4' if len(sys.argv) < 2 else sys.argv[1])
+env = gym.make('Centipede-v4' if len(sys.argv) < 2 else sys.argv[1])
 
 human_agent_action = 0
 expert_is_teaching = False
@@ -33,7 +33,7 @@ def argparser():
     parser.add_argument('--discount_factor', default=0.99, type=float)
     parser.add_argument('--cnn_mode', default='DQN', type=str)
     parser.add_argument('--max_episodes', default=1000, type=int)
-    parser.add_argument('--max_pretraining_rollouts', default=5, type=int)
+    parser.add_argument('--max_pretraining_rollouts', default=1, type=int)
     parser.add_argument('--skip_frame_rate', default=3, type=int)
     parser.add_argument('--pause_gap', default=5, type=int)
     parser.add_argument('--learning_yourself', default=False, type=bool)

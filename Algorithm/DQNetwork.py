@@ -54,7 +54,7 @@ class DQNetwork:
         fit = self.model.fit(x_train, target_train, batch_size=self.minibatch_size, epochs=1)
 
         loss = fit.history["loss"][0]
-        accuracy = fit.history["acc"][0]
+        accuracy = fit.history["accuracy"][0]
         return loss, accuracy, np.mean(next_q_value)
 
     def predict(self, state):
