@@ -30,6 +30,7 @@ class DQNetwork:
     def train(self, batch):
         x_train = []
         target_train = []
+        q_values = []
 
         for datapoint in batch:
             x_train.append(datapoint['source'].astype(np.float64))
@@ -37,6 +38,7 @@ class DQNetwork:
             next_state = datapoint['dest'].astype(np.float64)
             next_state_predicition = self.model.predict(next_state).ravel()
             next_q_value = np.max(next_state_predicition)
+            q_values.append(next_q_value)
 
             t = list(self.predict(datapoint['source'])[0])
             if datapoint['final']:
@@ -53,7 +55,7 @@ class DQNetwork:
 
         loss = fit.history["loss"][0]
         accuracy = fit.history["acc"][0]
-        return loss, accuracy
+        return loss, accuracy, np.mean(next_q_value)
 
     def predict(self, state):
         state = state.astype(np.float64)

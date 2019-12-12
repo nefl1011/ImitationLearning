@@ -8,6 +8,7 @@ import time
 import numpy as np
 from PIL import Image
 
+import Logger
 from Agent import Agent
 
 env = gym.make('Centipede-ram-v4' if len(sys.argv) < 2 else sys.argv[1])
@@ -18,7 +19,6 @@ human_wants_restart = False
 human_sets_pause = False
 img_size = (84, 84)
 scores = []
-t_confidences = []
 score = 0
 frame = 0
 skip_frame_rate = 4
@@ -128,13 +128,12 @@ def human_expert_act(agent, env, current_state):
 
 
 def agent_act(agent, env, current_state, learning_yourself):
-    global score, scores, frame, skip_frame_rate, t_confidences
+    global score, scores, frame, skip_frame_rate
     done = False
     # get confidence
     t_conf = agent.get_tau_confidence()
     conf = agent.get_action_confidence(np.asarray([current_state]))
     print("t_conf: %f and confidence: %f" % (t_conf, conf))
-    t_confidences.append(t_conf)
 
     # agent actions
     while not done and t_conf < conf:
@@ -168,7 +167,7 @@ def evaluate_scores():
 
 
 def main(args):
-    global human_agent_action, img_size, frame, score, scores, skip_frame_rate, t_confidences
+    global human_agent_action, img_size, frame, score, scores, skip_frame_rate
 
     # set environment
     env = gym.make(args.atari_game)
@@ -191,7 +190,8 @@ def main(args):
     learning_yourself = args.learning_yourself
     skip_frame_rate = args.skip_frame_rate
 
-    agent = Agent(input_shape, env.action_space.n, discount_factor, minibatch_size, replay_memory_size,
+    logger = Logger(args.atari_game, "data/log/")
+    agent = Agent(input_shape, env.action_space.n, discount_factor, minibatch_size, replay_memory_size, logger,
                   network=args.cnn_mode)
 
     agent.load_model(args.savedir)
@@ -199,7 +199,6 @@ def main(args):
     try:
         agent.load_experiences("data/experiences/experiences_0_%s.npy" % args.cnn_mode)
         scores = np.load("data/scores_expert.npy").tolist()
-        t_confidences = np.load("data/t_confs.npy").tolist()
     except IOError as io_err:
         print("Can't load experience/score file.")
 
@@ -265,7 +264,6 @@ def main(args):
 
         agent.save_experiences(0)
         np.save("data/scores_expert.npy", scores)
-        np.save("data/t_confs.npy", t_confidences)
 
         # train additional experience
         window_still_open = env.render()

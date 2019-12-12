@@ -11,12 +11,14 @@ from DQNetwork import DQNetwork
 
 class Agent:
 
-    def __init__(self, input_shape, actions, discount_factor, minibatch_size, replay_memory_size, network="CNN"):
+    def __init__(self, input_shape, actions, discount_factor, minibatch_size, replay_memory_size, logger, network="CNN"):
         self.input_shape = input_shape
         self.action_space = actions
         self.discount_factor = discount_factor
         self.minibatch_size = minibatch_size
         self.replay_memory_size = replay_memory_size
+
+        self.logger = logger
 
         self.mode = network
 
@@ -78,21 +80,28 @@ class Agent:
         else:
             batch = self.new_experiences
 
-        self.losses, self. accs = self.network.train(batch)
         self.new_experiences = []
+        # store log data
+        loss, accuracy, mean_q_value = self.network.train(batch)
+        self.logger.add_loss(loss)
+        self.logger.add_accuracy(accuracy)
+        self.logger.add_q(mean_q_value)
 
     def get_tau_confidence(self):
         if len(self.experiences) == 0:
             return math.inf
         batch = self.sample_batch()
-        wrong_classified = []
+
         # create batch of wrong_classified_confidence
+        wrong_classified = []
         for datapoint in batch:
             action = self.get_action(datapoint['source'].astype(np.float64))
             if action != datapoint['action']:
                 wrong_classified.append(self.get_action_confidence(datapoint['source'].astype(np.float64)))
         if len(wrong_classified) == 0:
             return 0
+
+        self.logger.add_t_conf(np.mean(wrong_classified))
         return np.mean(wrong_classified)
 
     def save_model(self):
