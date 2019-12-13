@@ -1,4 +1,7 @@
+import os
+
 import numpy as np
+from keras.engine.saving import load_model
 from keras.models import Sequential
 from keras.layers import Conv2D, Flatten, Dense, Activation
 
@@ -38,15 +41,21 @@ class CNN:
         x_train = np.asarray(x_train).squeeze()
         y_train = np.asarray(y_train).squeeze()
 
-        self.model.fit(x_train, y_train, batch_size=self.minibatch_size, epochs=1)
+        fit = self.model.fit(x_train, y_train, batch_size=self.minibatch_size, epochs=1)
+
+        loss = fit.history["loss"][0]
+        accuracy = fit.history["accuracy"][0]
+        return loss, accuracy, 0
+
 
     def predict(self, state):
         state = state.astype(np.float64)
         return self.model.predict(state, batch_size=1)
 
     def save(self, filename=None, append=""):
-        f = ('model%s.h5' % append) if filename is None else filename
-        self.model.save_weights(f)
+        f = ('data/models/model%s.h5' % append) if filename is None else filename
+        self.model.save(f)
 
     def load(self, path):
-        self.model.load_weights(path)
+        if os.path.exists(path):
+            self.model = load_model(path)
