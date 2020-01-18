@@ -80,12 +80,21 @@ class Agent:
         else:
             batch = self.new_experiences
 
-        self.new_experiences = []
         # store log data
         loss, accuracy, mean_q_value = self.network.train(batch)
+
+        self.new_experiences = []
+
         self.logger.add_loss(loss)
         self.logger.add_accuracy(accuracy)
         self.logger.add_q(mean_q_value)
+
+    def evaluate_reward(self, r):
+        self.logger.add_reward(r)
+
+
+    def evaluate_score(self, s):
+        self.logger.add_score(s)
 
     def get_tau_confidence(self):
         if len(self.experiences) == 0:

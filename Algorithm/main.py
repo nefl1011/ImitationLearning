@@ -22,6 +22,7 @@ scores = []
 score = 0
 frame = 0
 skip_frame_rate = 4
+currentsteps = 1
 
 
 def argparser():
@@ -29,10 +30,10 @@ def argparser():
     parser.add_argument('--atari_game', help='name of an atari game supported by gym', default='Centipede-v4')
     parser.add_argument('--savedir', help='name of directory to save model', default='data/models/model.h5')
     parser.add_argument('--minibatch_size', default=32, type=int)
-    parser.add_argument('--replay_memory_size', default=1000000, type=int)  # +- 100 or 200 full games
+    parser.add_argument('--replay_memory_size', default=5000, type=int)  # +- 10 or 20 full games
     parser.add_argument('--discount_factor', default=0.99, type=float)
     parser.add_argument('--cnn_mode', default='DQN', type=str)
-    parser.add_argument('--max_episodes', default=1000, type=int)
+    parser.add_argument('--max_episodes', default=71, type=int) # 101
     parser.add_argument('--max_pretraining_rollouts', default=1, type=int)
     parser.add_argument('--skip_frame_rate', default=3, type=int)
     parser.add_argument('--pause_gap', default=5, type=int)
@@ -96,9 +97,10 @@ def step(env, action, agent):
     for i in range(skip_frame_rate):
         window_still_open = env.render()
         if not window_still_open:
-            if agent == None:
+            if agent != None:
                 agent.save_model()
             sys.exit("Exit")
+
         obs, reward, temp_done, info = env.step(action)
         obs_buffer.append(preprocess_observation(obs, img_size))
         total_reward += reward
@@ -123,7 +125,7 @@ def human_expert_act(agent, env, current_state):
 
         current_state = next_state
 
-        score += clipped_reward
+        score += r
         frame += 1
 
 
@@ -152,17 +154,40 @@ def agent_act(agent, env, current_state, learning_yourself):
             agent.add_experience(np.asarray([current_state]), action, clipped_reward, np.asarray([next_state]), done)
 
         current_state = next_state
-        score += clipped_reward
         frame += 1
     # reset for human expert
     if done:
         env.reset()
 
+def evaluate_reward(agent, env, current_state):
+    global score, scores, frame, skip_frame_rate
+    reward = 0
+    # agent actions
+    done = False
+    while not done:
 
-def evaluate_scores():
+        action = agent.get_action(np.asarray([current_state]))
+        print("action: %d" % (action))
+        next_state, r, done, info = step(env, action, agent)
+
+        next_state = np.array(next_state)
+
+        current_state = next_state
+
+        reward += r
+        frame += 1
+
+    agent.evaluate_reward(reward)
+    # reset for human expert
+    if done:
+        env.reset()
+
+
+def evaluate_scores(agent):
     global score, scores
     print("Total score: %d" % (score))
-    scores.append(score)
+    #scores.append(score)
+    agent.evaluate_score(score)
     score = 0
 
 
@@ -196,11 +221,11 @@ def main(args):
 
     agent.load_model(args.savedir)
 
-    try:
-        agent.load_experiences("data/experiences/experiences_0_%s.npy" % args.cnn_mode)
-        scores = np.load("data/scores_expert.npy").tolist()
-    except IOError as io_err:
-        print("Can't load experience/score file.")
+    #try:
+        #agent.load_experiences("data/experiences/experiences_0_%s.npy" % args.cnn_mode)
+        #scores = np.load("data/scores_expert.npy").tolist()
+    #except IOError as io_err:
+        #print("Can't load experience/score file.")
 
 
     max_episodes = args.max_episodes
@@ -218,10 +243,10 @@ def main(args):
 
         human_expert_act(agent, env, current_state)
 
-        evaluate_scores()
+        evaluate_scores(agent)
 
-    agent.save_experiences(0)
-    np.save("data/scores_expert.npy", scores)
+    #agent.save_experiences(0)
+    # np.save("data/scores_expert.npy", scores)
 
     # train pretrained session
     if max_expert_rollouts > 0:
@@ -260,15 +285,28 @@ def main(args):
 
             human_expert_act(agent, env, current_state)
 
-            evaluate_scores()
+            evaluate_scores(agent)
 
-        agent.save_experiences(0)
-        np.save("data/scores_expert.npy", scores)
+        #agent.save_experiences(0)
+        #np.save("data/scores_expert.npy", scores)
 
         # train additional experience
         window_still_open = env.render()
         if window_still_open:
             agent.train()
+
+        # evaluate reward
+        env.reset()
+        obs = preprocess_observation(env.reset(), img_size)
+        initial_buffer = []
+        for j in range(skip_frame_rate):
+            initial_buffer.append(obs)
+        current_state = np.array(initial_buffer)
+        evaluate_reward(agent, env, current_state)
+
+        # save model
+        if (episode + 2) % 10 == 0:
+            agent.save_model()
 
 
 if __name__ == '__main__':

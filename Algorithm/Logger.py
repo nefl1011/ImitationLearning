@@ -4,7 +4,7 @@ import shutil
 from Statistic import Statistic
 
 MAX_LOSS = 5
-RUN_UPDATE_FREQUENCY = 10
+RUN_UPDATE_FREQUENCY = 1
 TRAINING_UPDATE_FREQUENCY = 10
 
 class Logger:
@@ -21,6 +21,7 @@ class Logger:
         self.accuracy = Statistic("update", "accuracy", TRAINING_UPDATE_FREQUENCY, directory_path, header)
         self.q = Statistic("update", "q", TRAINING_UPDATE_FREQUENCY, directory_path, header)
         self.t_conf = Statistic("update", "t_conf", TRAINING_UPDATE_FREQUENCY, directory_path, header)
+        self.reward = Statistic("run", "reward", TRAINING_UPDATE_FREQUENCY, directory_path, header)
 
     def add_score(self, score):
         self.score.add_entry(score)
@@ -40,3 +41,6 @@ class Logger:
 
     def add_t_conf(self, t_conf):
         self.t_conf.add_entry(t_conf)
+
+    def add_reward(self, r):
+        self.reward.add_entry(r)
