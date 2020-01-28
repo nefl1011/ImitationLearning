@@ -75,7 +75,7 @@ class Statistic:
         if not os.path.exists(path):
             with open(path, "w"):
                 pass
-        scores_file = open(path, "a")
+        scores_file = open(path, "a", newline='')
         with scores_file:
             writer = csv.writer(scores_file)
             writer.writerow([score])

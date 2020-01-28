@@ -33,7 +33,7 @@ def argparser():
     parser.add_argument('--replay_memory_size', default=5000, type=int)  # +- 10 or 20 full games
     parser.add_argument('--discount_factor', default=0.99, type=float)
     parser.add_argument('--cnn_mode', default='DQN', type=str)
-    parser.add_argument('--max_episodes', default=71, type=int) # 101
+    parser.add_argument('--max_episodes', default=31, type=int) # 101
     parser.add_argument('--max_pretraining_rollouts', default=1, type=int)
     parser.add_argument('--skip_frame_rate', default=3, type=int)
     parser.add_argument('--pause_gap', default=5, type=int)

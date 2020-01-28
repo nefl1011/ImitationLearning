@@ -1,10 +1,14 @@
 import os
+from random import randrange
+
+import tensorflow as tf
+import datetime
 
 import numpy as np
 from keras.engine.saving import load_model
 from keras.models import Sequential
 from keras.layers import Conv2D, Flatten, Dense, Activation
-
+from keras.callbacks import TensorBoard
 
 class DQNetwork:
 
@@ -32,8 +36,15 @@ class DQNetwork:
         target_train = []
         q_values = []
 
+        x_test = []
+        target_test = []
+
         for datapoint in batch:
-            x_train.append(datapoint['source'].astype(np.float64))
+            rand_number = randrange(0, 101)
+            if rand_number > 10:
+                x_train.append(datapoint['source'].astype(np.float64))
+            else:
+                x_test.append(datapoint['source'].astype(np.float64))
 
             next_state = datapoint['dest'].astype(np.float64)
             next_state_predicition = self.model.predict(next_state).ravel()
@@ -46,16 +57,26 @@ class DQNetwork:
             else:
                 t[datapoint['action']] = datapoint['reward'] + self.discount_factor * next_q_value
 
-            target_train.append(t)
+            if rand_number > 10:
+                target_train.append(t)
+            else:
+                target_test.append(t)
 
         x_train = np.asarray(x_train).squeeze()
         target_train = np.asarray(target_train).squeeze()
+        x_test = np.asarray(x_test).squeeze()
+        target_test = np.asarray(target_test).squeeze()
+
+        # log_dir = "logs\\fit\\" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        # tensorboard_callback = TensorBoard(log_dir=log_dir, histogram_freq=1)
 
         fit = self.model.fit(x_train, target_train, batch_size=self.minibatch_size, epochs=1)
 
+        eval_results = self.model.evaluate(x_test, target_test)
+
         loss = fit.history["loss"][0]
         accuracy = fit.history["accuracy"][0]
-        return loss, accuracy, np.mean(next_q_value)
+        return loss, accuracy, np.mean(next_q_value), eval_results[0], eval_results[1]
 
     def predict(self, state):
         state = state.astype(np.float64)

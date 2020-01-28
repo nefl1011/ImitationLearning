@@ -17,11 +17,13 @@ class Logger:
 
         self.score = Statistic("run", "score", RUN_UPDATE_FREQUENCY, directory_path, header)
         self.step = Statistic("run", "step", RUN_UPDATE_FREQUENCY, directory_path, header)
-        self.loss = Statistic("update", "loss", TRAINING_UPDATE_FREQUENCY, directory_path, header)
-        self.accuracy = Statistic("update", "accuracy", TRAINING_UPDATE_FREQUENCY, directory_path, header)
-        self.q = Statistic("update", "q", TRAINING_UPDATE_FREQUENCY, directory_path, header)
-        self.t_conf = Statistic("update", "t_conf", TRAINING_UPDATE_FREQUENCY, directory_path, header)
-        self.reward = Statistic("run", "reward", TRAINING_UPDATE_FREQUENCY, directory_path, header)
+        self.loss = Statistic("update", "loss", RUN_UPDATE_FREQUENCY, directory_path, header)
+        self.accuracy = Statistic("update", "accuracy", RUN_UPDATE_FREQUENCY, directory_path, header)
+        self.q = Statistic("update", "q", RUN_UPDATE_FREQUENCY, directory_path, header)
+        self.t_conf = Statistic("update", "t_conf", RUN_UPDATE_FREQUENCY, directory_path, header)
+        self.reward = Statistic("run", "reward", RUN_UPDATE_FREQUENCY, directory_path, header)
+        self.eval_loss = Statistic("update", "eval_loss", RUN_UPDATE_FREQUENCY, directory_path, header)
+        self.eval_acc = Statistic("run", "eval_acc", RUN_UPDATE_FREQUENCY, directory_path, header)
 
     def add_score(self, score):
         self.score.add_entry(score)
@@ -44,3 +46,9 @@ class Logger:
 
     def add_reward(self, r):
         self.reward.add_entry(r)
+
+    def add_eval_loss(self, eval_loss):
+        self.eval_loss.add_entry(eval_loss)
+
+    def add_eval_acc(self, eval_acc):
+        self.eval_acc.add_entry(eval_acc)

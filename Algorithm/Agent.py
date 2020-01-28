@@ -81,13 +81,15 @@ class Agent:
             batch = self.new_experiences
 
         # store log data
-        loss, accuracy, mean_q_value = self.network.train(batch)
+        loss, accuracy, mean_q_value, eval_loss, eval_acc = self.network.train(batch)
 
         self.new_experiences = []
 
         self.logger.add_loss(loss)
         self.logger.add_accuracy(accuracy)
         self.logger.add_q(mean_q_value)
+        self.logger.add_eval_loss(eval_loss)
+        self.logger.add_eval_acc(eval_acc)
 
     def evaluate_reward(self, r):
         self.logger.add_reward(r)
