@@ -21,7 +21,7 @@ class Logger:
         self.accuracy = Statistic("update", "accuracy", RUN_UPDATE_FREQUENCY, directory_path, header)
         self.q = Statistic("update", "q", RUN_UPDATE_FREQUENCY, directory_path, header)
         self.t_conf = Statistic("update", "t_conf", RUN_UPDATE_FREQUENCY, directory_path, header)
-        self.reward = Statistic("run", "reward", RUN_UPDATE_FREQUENCY, directory_path, header)
+        self.reward = Statistic("run", "reward", TRAINING_UPDATE_FREQUENCY, directory_path, header)
         self.eval_loss = Statistic("update", "eval_loss", RUN_UPDATE_FREQUENCY, directory_path, header)
         self.eval_acc = Statistic("run", "eval_acc", RUN_UPDATE_FREQUENCY, directory_path, header)
 

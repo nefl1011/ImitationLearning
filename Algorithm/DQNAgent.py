@@ -11,6 +11,7 @@ from CNN import CNN
 from DQNetwork import DQNetwork
 
 SAVE_INTERVAL = 10
+TARGET_NETWORK_UPDATE_FREQUENCY = 10
 
 class DQNAgent(Agent):
 
@@ -26,10 +27,14 @@ class DQNAgent(Agent):
         self.discount_factor = discount_factor
         self.minibatch_size = minibatch_size
 
-        self.rollout = 0
+        self.rollout = 1
         self._name = "DQNAgent"
 
         self.network = DQNetwork(self.input_shape, self.action_space, self.discount_factor, self.minibatch_size)
+        self.target_network = DQNetwork(self.input_shape, self.action_space, self.discount_factor, self.minibatch_size)
+
+        self._reset_target_network()
+
         self.load_model()
         super(DQNAgent, self).__init__(
             logger,
@@ -54,7 +59,7 @@ class DQNAgent(Agent):
             batch = self._replay_buffer.get_new_experiences()
 
         # store log data
-        loss, accuracy, mean_q_value, eval_loss, eval_acc = self.network.train(batch)
+        loss, accuracy, mean_q_value, eval_loss, eval_acc = self.network.train(batch, self.target_network)
 
         self._replay_buffer.reset_new_experiences()
 
@@ -66,10 +71,16 @@ class DQNAgent(Agent):
 
         if self.rollout % SAVE_INTERVAL == 0:
             self.save_model()
+        if self.rollout % TARGET_NETWORK_UPDATE_FREQUENCY == 0:
+            self._reset_target_network()
 
     def save_model(self):
         self.network.save(append=self._name)
+        self.target_network.save(append='_target_%s' % self._name)
 
     def load_model(self):
-        loadstring = 'data/models/model_%s.h5' % self._name
-        self.network.load(loadstring)
+        self.network.load('data/models/model_%s.h5' % self._name)
+        self.target_network.load('data/models/model_target_%s.h5' % self._name)
+
+    def _reset_target_network(self):
+        self.target_network.model.set_weights(self.network.model.get_weights())

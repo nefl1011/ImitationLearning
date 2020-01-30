@@ -31,7 +31,7 @@ class DQNetwork:
         self.model.compile(loss="mean_squared_error", optimizer="rmsprop", metrics=["accuracy"])
         # self.model.summary()
 
-    def train(self, batch):
+    def train(self, batch, target_network):
         x_train = []
         target_train = []
         q_values = []
@@ -47,7 +47,7 @@ class DQNetwork:
                 x_test.append(datapoint['source'].astype(np.float64))
 
             next_state = datapoint['dest'].astype(np.float64)
-            next_state_predicition = self.model.predict(next_state).ravel()
+            next_state_predicition = target_network.predict(next_state).ravel()
             next_q_value = np.max(next_state_predicition)
             q_values.append(next_q_value)
 

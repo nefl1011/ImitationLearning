@@ -36,7 +36,7 @@ def argparser():
     parser.add_argument('--discount_factor', default=0.99, type=float)
     parser.add_argument('--cnn_mode', default='DQN', type=str)
     parser.add_argument('--max_episodes', default=31, type=int)  # 101
-    parser.add_argument('--max_pretraining_rollouts', default=1, type=int)
+    parser.add_argument('--max_expert_rollouts', default=1, type=int)
     parser.add_argument('--skip_frame_rate', default=4, type=int)
     parser.add_argument('--pause_gap', default=5, type=int)
     return parser.parse_args()
@@ -63,7 +63,6 @@ def key_press(key, mod):
         a = 0  # everything else
 
     human_agent_action = a
-
 
 
 def key_release(key, mod):
@@ -123,7 +122,8 @@ def human_expert_act(replay_buffer, env, current_state):
         next_state = np.array(next_state)
 
         clipped_reward = np.clip(r, -1, 1)
-        replay_buffer.add_experience(np.asarray([current_state]), action, clipped_reward, np.asarray([next_state]), done)
+        replay_buffer.add_experience(np.asarray([current_state]), action, clipped_reward, np.asarray([next_state]),
+                                     done)
 
         current_state = next_state
 
@@ -150,24 +150,31 @@ def agent_act(agent, env, current_state):
         env.reset()
 
 
-def evaluate_reward(agent, env, current_state ,logger):
+def evaluate_reward(agent, env, logger):
     global score, scores, frame, skip_frame_rate
-    reward = 0
-    # agent actions
     done = False
-    while not done:
-        action = agent.get_action(np.asarray([current_state]))
-        print("action: %d" % (action))
-        next_state, r, done, info = step(env, action, agent)
+    for _ in range(0, 10):
+        env.reset()
+        obs = preprocess_observation(env.reset(), img_size)
+        initial_buffer = []
+        for j in range(skip_frame_rate):
+            initial_buffer.append(obs)
+        current_state = np.array(initial_buffer)
+        reward = 0
+        # agent actions
+        done = False
+        while not done:
+            action = agent.get_action(np.asarray([current_state]))
+            next_state, r, done, info = step(env, action, agent)
 
-        next_state = np.array(next_state)
+            next_state = np.array(next_state)
 
-        current_state = next_state
+            current_state = next_state
 
-        reward += r
-        frame += 1
+            reward += r
+            frame += 1
+        logger.add_reward(reward)
 
-    logger.add_reward(reward)
     # reset for human expert
     if done:
         env.reset()
@@ -242,7 +249,7 @@ def main(args):
         pause_seconds = sec
 
         # get expert actions until we are done
-        for i in range(0, 1):
+        for i in range(0, args.max_expert_rollouts):
             if i > 0:
                 score = 0
                 frame = 0
@@ -259,13 +266,7 @@ def main(args):
             agent.train()
 
         # evaluate reward
-        env.reset()
-        obs = preprocess_observation(env.reset(), img_size)
-        initial_buffer = []
-        for j in range(skip_frame_rate):
-            initial_buffer.append(obs)
-        current_state = np.array(initial_buffer)
-        evaluate_reward(agent, env, current_state, logger)
+        evaluate_reward(agent, env, logger)
 
 
 if __name__ == '__main__':
