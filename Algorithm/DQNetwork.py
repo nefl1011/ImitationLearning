@@ -83,7 +83,7 @@ class DQNetwork:
         return self.model.predict(state, batch_size=1)
 
     def save(self, filename=None, append=""):
-        f = ('data/models/model%s.h5' % append) if filename is None else filename
+        f = ('data/models/model_%s.h5' % append) if filename is None else filename
         self.model.save(f)
 
     def load(self, path):

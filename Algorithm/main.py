@@ -9,7 +9,8 @@ import numpy as np
 from PIL import Image
 
 from Logger import Logger
-from Agent import Agent
+from DQNAgent import DQNAgent
+from ReplayBuffer import ReplayBuffer
 
 env = gym.make('Centipede-v4' if len(sys.argv) < 2 else sys.argv[1])
 
@@ -23,21 +24,21 @@ score = 0
 frame = 0
 skip_frame_rate = 4
 currentsteps = 1
+pause_seconds = 5
 
 
 def argparser():
     parser = argparse.ArgumentParser(description='Algorithm to teach a CNN playing a atari game.')
     parser.add_argument('--atari_game', help='name of an atari game supported by gym', default='Centipede-v4')
-    parser.add_argument('--savedir', help='name of directory to save model', default='data/models/model.h5')
+    parser.add_argument('--savedir', help='name of directory to save model', default='data/models/')
     parser.add_argument('--minibatch_size', default=32, type=int)
     parser.add_argument('--replay_memory_size', default=5000, type=int)  # +- 10 or 20 full games
     parser.add_argument('--discount_factor', default=0.99, type=float)
     parser.add_argument('--cnn_mode', default='DQN', type=str)
-    parser.add_argument('--max_episodes', default=31, type=int) # 101
+    parser.add_argument('--max_episodes', default=31, type=int)  # 101
     parser.add_argument('--max_pretraining_rollouts', default=1, type=int)
-    parser.add_argument('--skip_frame_rate', default=3, type=int)
+    parser.add_argument('--skip_frame_rate', default=4, type=int)
     parser.add_argument('--pause_gap', default=5, type=int)
-    parser.add_argument('--learning_yourself', default=False, type=bool)
     return parser.parse_args()
 
 
@@ -47,8 +48,7 @@ def key_press(key, mod):
     if key == 65293:
         sys.exit("Exit")
         human_wants_restart = True  # enter
-    if key == 112:
-        human_sets_pause = not human_sets_pause  # p
+
     if key == 97 or key == 65361:
         a = 4  # a
     elif key == 100 or key == 65363:
@@ -65,9 +65,13 @@ def key_press(key, mod):
     human_agent_action = a
 
 
+
 def key_release(key, mod):
-    global human_agent_action, expert_is_teaching
+    global human_agent_action, expert_is_teaching, pause_seconds
     expert_is_teaching = False
+
+    if key == 112:
+        pause_seconds += 60  # p
     if key == 97 or key == 65361:
         a = 4  # a
     elif key == 100 or key == 65363:
@@ -97,8 +101,6 @@ def step(env, action, agent):
     for i in range(skip_frame_rate):
         window_still_open = env.render()
         if not window_still_open:
-            if agent != None:
-                agent.save_model()
             sys.exit("Exit")
 
         obs, reward, temp_done, info = env.step(action)
@@ -111,7 +113,7 @@ def step(env, action, agent):
     return obs_buffer, total_reward, done, info
 
 
-def human_expert_act(agent, env, current_state):
+def human_expert_act(replay_buffer, env, current_state):
     global frame, score, skip_frame_rate
     done = False
     while not done:
@@ -121,7 +123,7 @@ def human_expert_act(agent, env, current_state):
         next_state = np.array(next_state)
 
         clipped_reward = np.clip(r, -1, 1)
-        agent.add_experience(np.asarray([current_state]), action, clipped_reward, np.asarray([next_state]), done)
+        replay_buffer.add_experience(np.asarray([current_state]), action, clipped_reward, np.asarray([next_state]), done)
 
         current_state = next_state
 
@@ -129,29 +131,17 @@ def human_expert_act(agent, env, current_state):
         frame += 1
 
 
-def agent_act(agent, env, current_state, learning_yourself):
+def agent_act(agent, env, current_state):
     global score, scores, frame, skip_frame_rate
     done = False
-    # get confidence
-    t_conf = agent.get_tau_confidence()
-    conf = agent.get_action_confidence(np.asarray([current_state]))
-    print("t_conf: %f and confidence: %f" % (t_conf, conf))
 
     # agent actions
-    while not done and t_conf < conf:
-
+    while not done and agent.agent_is_confident(np.asarray([current_state])):
         action = agent.get_action(np.asarray([current_state]))
-        conf = agent.get_action_confidence(np.asarray([current_state]))
-        print("Get action: %d with confidence: %f" % (action, conf))
 
         next_state, r, done, info = step(env, action, agent)
 
         next_state = np.array(next_state)
-
-        clipped_reward = np.clip(r, -1, 1)
-        # lerning yourself
-        if learning_yourself:
-            agent.add_experience(np.asarray([current_state]), action, clipped_reward, np.asarray([next_state]), done)
 
         current_state = next_state
         frame += 1
@@ -159,13 +149,13 @@ def agent_act(agent, env, current_state, learning_yourself):
     if done:
         env.reset()
 
-def evaluate_reward(agent, env, current_state):
+
+def evaluate_reward(agent, env, current_state ,logger):
     global score, scores, frame, skip_frame_rate
     reward = 0
     # agent actions
     done = False
     while not done:
-
         action = agent.get_action(np.asarray([current_state]))
         print("action: %d" % (action))
         next_state, r, done, info = step(env, action, agent)
@@ -177,22 +167,22 @@ def evaluate_reward(agent, env, current_state):
         reward += r
         frame += 1
 
-    agent.evaluate_reward(reward)
+    logger.add_reward(reward)
     # reset for human expert
     if done:
         env.reset()
 
 
-def evaluate_scores(agent):
+def evaluate_scores(logger):
     global score, scores
     print("Total score: %d" % (score))
-    #scores.append(score)
-    agent.evaluate_score(score)
+    # scores.append(score)
+    logger.add_score(score)
     score = 0
 
 
 def main(args):
-    global human_agent_action, img_size, frame, score, scores, skip_frame_rate
+    global human_agent_action, img_size, frame, score, scores, skip_frame_rate, pause_seconds
 
     # set environment
     env = gym.make(args.atari_game)
@@ -212,45 +202,20 @@ def main(args):
     minibatch_size = args.minibatch_size
     replay_memory_size = args.replay_memory_size
     img_size = (84, 84)
-    learning_yourself = args.learning_yourself
     skip_frame_rate = args.skip_frame_rate
+    pause_seconds = args.pause_gap
 
     logger = Logger(args.atari_game, "data/log/")
-    agent = Agent(input_shape, env.action_space.n, discount_factor, minibatch_size, replay_memory_size, logger,
-                  network=args.cnn_mode)
+    replay_buffer = ReplayBuffer(replay_memory_size, minibatch_size)
 
-    agent.load_model(args.savedir)
-
-    #try:
-        #agent.load_experiences("data/experiences/experiences_0_%s.npy" % args.cnn_mode)
-        #scores = np.load("data/scores_expert.npy").tolist()
-    #except IOError as io_err:
-        #print("Can't load experience/score file.")
-
+    agent = DQNAgent(input_shape,
+                     env.action_space.n,
+                     discount_factor,
+                     replay_buffer,
+                     minibatch_size,
+                     logger)
 
     max_episodes = args.max_episodes
-
-    # pretrain from expert
-    max_expert_rollouts = args.max_pretraining_rollouts
-    for i in range(0, max_expert_rollouts):
-        score = 0
-        frame = 0
-        obs = preprocess_observation(env.reset(), img_size)
-        initial_buffer = []
-        for j in range(skip_frame_rate):
-            initial_buffer.append(obs)
-        current_state = np.array(initial_buffer)
-
-        human_expert_act(agent, env, current_state)
-
-        evaluate_scores(agent)
-
-    #agent.save_experiences(0)
-    # np.save("data/scores_expert.npy", scores)
-
-    # train pretrained session
-    if max_expert_rollouts > 0:
-        agent.train()
 
     # start algorithm
     for episode in range(max_episodes):
@@ -264,31 +229,29 @@ def main(args):
         frame = 0
 
         # get agent action until not confident enough
-        agent_act(agent, env, current_state, learning_yourself)
+        agent_act(agent, env, current_state)
 
         # request fpr expert
-        print("Need Expert Demonstration in %d seconds!" % (args.pause_gap))
+        print("Need Expert Demonstration in %d seconds!" % pause_seconds)
         sec = args.pause_gap
-        while sec > 0:
+        while pause_seconds > 0:
             time.sleep(1)
-            sec -= 1
-            print(sec)
+            pause_seconds -= 1
+            print(pause_seconds)
         print("Begin!")
+        pause_seconds = sec
 
         # get expert actions until we are done
-        for i in range(0, max_expert_rollouts):
+        for i in range(0, 1):
             if i > 0:
                 score = 0
                 frame = 0
                 obs = preprocess_observation(env.reset(), img_size)
                 current_state = np.array([obs, obs, obs, obs])
 
-            human_expert_act(agent, env, current_state)
+            human_expert_act(replay_buffer, env, current_state)
 
-            evaluate_scores(agent)
-
-        #agent.save_experiences(0)
-        #np.save("data/scores_expert.npy", scores)
+            evaluate_scores(logger)
 
         # train additional experience
         window_still_open = env.render()
@@ -302,11 +265,7 @@ def main(args):
         for j in range(skip_frame_rate):
             initial_buffer.append(obs)
         current_state = np.array(initial_buffer)
-        evaluate_reward(agent, env, current_state)
-
-        # save model
-        if (episode + 2) % 10 == 0:
-            agent.save_model()
+        evaluate_reward(agent, env, current_state, logger)
 
 
 if __name__ == '__main__':
