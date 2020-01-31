@@ -32,17 +32,14 @@ class ReplayBuffer:
         if len(self._new_experiences) >= self._replay_memory_size:
             self._new_experiences.pop(0)
 
-        self._experiences.append({'source': source,
-                                 'action': action,
-                                 'reward': reward,
-                                 'dest': dest,
-                                 'final': final})
+        experience = {'source': source,
+                      'action': action,
+                      'reward': reward,
+                      'dest': dest,
+                      'final': final}
 
-        self._new_experiences.append({'source': source,
-                                     'action': action,
-                                     'reward': reward,
-                                     'dest': dest,
-                                     'final': final})
+        self._experiences.append(experience)
+        self._new_experiences.append(experience)
 
     def sample_batch(self):
         batch = []
