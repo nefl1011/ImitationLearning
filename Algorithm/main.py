@@ -8,11 +8,11 @@ import time
 import numpy as np
 from PIL import Image
 
-from Logger import Logger
+from CNNAgent import CNNAgent
 from DQNAgent import DQNAgent
+from Logger import Logger
+from DDQNAgent import DDQNAgent
 from ReplayBuffer import ReplayBuffer
-
-env = gym.make('Centipede-v4' if len(sys.argv) < 2 else sys.argv[1])
 
 human_agent_action = 0
 expert_is_teaching = False
@@ -34,7 +34,7 @@ def argparser():
     parser.add_argument('--minibatch_size', default=32, type=int)
     parser.add_argument('--replay_memory_size', default=5000, type=int)  # +- 10 or 20 full games
     parser.add_argument('--discount_factor', default=0.99, type=float)
-    parser.add_argument('--cnn_mode', default='DQN', type=str)
+    parser.add_argument('--mode', default='ddqn', type=str)
     parser.add_argument('--max_episodes', default=31, type=int)  # 101
     parser.add_argument('--max_expert_rollouts', default=1, type=int)
     parser.add_argument('--skip_frame_rate', default=4, type=int)
@@ -211,16 +211,38 @@ def main(args):
     img_size = (84, 84)
     skip_frame_rate = args.skip_frame_rate
     pause_seconds = args.pause_gap
+    mode = args.mode
 
-    logger = Logger(args.atari_game, "data/log/")
+    logger = Logger(args.atari_game, "data/%s/log/" % mode)
     replay_buffer = ReplayBuffer(replay_memory_size, minibatch_size)
 
-    agent = DQNAgent(input_shape,
-                     env.action_space.n,
-                     discount_factor,
-                     replay_buffer,
-                     minibatch_size,
-                     logger)
+    if mode == 'dqn':
+        print("Using DQN agent")
+        agent = DQNAgent(input_shape,
+                         env.action_space.n,
+                         discount_factor,
+                         replay_buffer,
+                         minibatch_size,
+                         logger)
+    elif mode == 'cnn':
+        print("Using CNN agent")
+        agent = CNNAgent(input_shape,
+                         env.action_space.n,
+                         replay_buffer,
+                         minibatch_size,
+                         logger)
+    elif mode == 'ppo':
+        print("Using PPO agent")
+    else:
+        print("Using DDQN agent")
+        agent = DDQNAgent(input_shape,
+                          env.action_space.n,
+                          discount_factor,
+                          replay_buffer,
+                          minibatch_size,
+                          logger)
+
+    agent.load_model()
 
     max_episodes = args.max_episodes
 

@@ -1,10 +1,11 @@
-import numpy as np
-
 from Agent import Agent
+from DQNAgent import DQNAgent
 from DQNetwork import DQNetwork
 
+TARGET_NETWORK_UPDATE_FREQUENCY = 10
 
-class DQNAgent(Agent):
+
+class DDQNAgent(DQNAgent):
 
     def __init__(self,
                  input_shape,
@@ -12,29 +13,20 @@ class DQNAgent(Agent):
                  discount_factor,
                  replay_buffer,
                  minibatch_size,
-                 logger,
-                 name="dqn"):
-        self.input_shape = input_shape
-        self.action_space = actions
-        self.discount_factor = discount_factor
-        self.minibatch_size = minibatch_size
+                 logger):
+        name = "ddqn"
 
-        self.network = DQNetwork(self.input_shape, self.action_space, self.discount_factor, self.minibatch_size)
-
-        super(DQNAgent, self).__init__(
-            logger,
+        super(DDQNAgent, self).__init__(
+            input_shape,
+            actions,
+            discount_factor,
             replay_buffer,
+            minibatch_size,
+            logger,
             name=name)
 
-    def get_action(self, state):
-        return np.argmax(self.network.predict(state))
-
-    def _get_action_confidence(self, state):
-        q_values = self.network.predict(state)[0]
-        idxs = np.argwhere(q_values == np.max(q_values)).ravel()
-        max_q = np.random.choice(idxs)
-        # boltzmann
-        return np.exp(q_values[max_q]) / np.sum(np.exp(q_values))
+        self.target_network = DQNetwork(self.input_shape, self.action_space, self.discount_factor, self.minibatch_size)
+        self._reset_target_network()
 
     def _train(self, train_all=False):
         self.rollout += 1
@@ -44,7 +36,7 @@ class DQNAgent(Agent):
             batch = self._replay_buffer.get_new_experiences()
 
         # store log data
-        loss, accuracy, mean_q_value, eval_loss, eval_acc = self.network.train(batch)
+        loss, accuracy, mean_q_value, eval_loss, eval_acc = self.network.train(batch, self.target_network)
 
         self._replay_buffer.reset_new_experiences()
 
@@ -54,9 +46,16 @@ class DQNAgent(Agent):
 
         if self.rollout % Agent.SAVE_INTERVAL == 0:
             self.save_model()
+        if self.rollout % TARGET_NETWORK_UPDATE_FREQUENCY == 0:
+            self._reset_target_network()
 
     def save_model(self):
         self.network.save(append='%s/model.h5' % self.name)
+        self.target_network.save(append='%s/model_target.h5' % self.name)
 
     def load_model(self):
         self.network.load('%s/model.h5' % self.name)
+        self.target_network.load('%s/model_target.h5' % self.name)
+
+    def _reset_target_network(self):
+        self.target_network.model.set_weights(self.network.model.get_weights())

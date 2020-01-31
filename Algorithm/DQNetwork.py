@@ -9,14 +9,20 @@ from keras.engine.saving import load_model
 from keras.models import Sequential
 from keras.layers import Conv2D, Flatten, Dense, Activation
 from keras.callbacks import TensorBoard
+from keras import backend as K
 
-class DQNetwork:
+from Network import Network
 
-    def __init__(self, input_shape, action_space, discount_factor, minibatch_size):
-        self.input_shape = input_shape
-        self.action_space = action_space
+
+class DQNetwork(Network):
+
+    def __init__(self, input_shape, action_space, discount_factor, minibatch_size, mode='dqn'):
+        super(DQNetwork, self).__init__(
+            input_shape,
+            action_space)
         self.discount_factor = discount_factor
         self.minibatch_size = minibatch_size
+        self.mode = mode
 
         self.model = Sequential()
         self.model.add(Conv2D(32, 8, strides=(4, 4), padding="valid", activation="relu", input_shape=input_shape,
@@ -31,13 +37,22 @@ class DQNetwork:
         self.model.compile(loss="mean_squared_error", optimizer="rmsprop", metrics=["accuracy"])
         # self.model.summary()
 
-    def train(self, batch, target_network):
+    def _huber_loss(self, y_true, y_pred, clip_delta=1.0):
+        error = y_true - y_pred
+        cond = K.abs(error) <= clip_delta
+
+        squared_loss = 0.5 * K.square(error)
+        quadratic_loss = 0.5 * K.square(clip_delta) + clip_delta * (K.abs(error) - clip_delta)
+
+        return K.mean(tf.where(cond, squared_loss, quadratic_loss))
+
+    def train(self, batch, target_network=None):
         x_train = []
         target_train = []
-        q_values = []
 
         x_test = []
         target_test = []
+        max_q_values = []
 
         for datapoint in batch:
             rand_number = randrange(0, 101)
@@ -47,9 +62,12 @@ class DQNetwork:
                 x_test.append(datapoint['source'].astype(np.float64))
 
             next_state = datapoint['dest'].astype(np.float64)
-            next_state_predicition = target_network.predict(next_state).ravel()
+            if target_network == None:
+                next_state_predicition = self.predict(next_state).ravel()
+            else:
+                next_state_predicition = target_network.predict(next_state).ravel()
             next_q_value = np.max(next_state_predicition)
-            q_values.append(next_q_value)
+            max_q_values.append(next_q_value)
 
             t = list(self.predict(datapoint['source'])[0])
             if datapoint['final']:
@@ -76,16 +94,4 @@ class DQNetwork:
 
         loss = fit.history["loss"][0]
         accuracy = fit.history["accuracy"][0]
-        return loss, accuracy, np.mean(next_q_value), eval_results[0], eval_results[1]
-
-    def predict(self, state):
-        state = state.astype(np.float64)
-        return self.model.predict(state, batch_size=1)
-
-    def save(self, filename=None, append=""):
-        f = ('data/models/model_%s.h5' % append) if filename is None else filename
-        self.model.save(f)
-
-    def load(self, path):
-        if os.path.exists(path):
-            self.model = load_model(path)
+        return loss, accuracy, np.mean(max_q_values), eval_results[0], eval_results[1]

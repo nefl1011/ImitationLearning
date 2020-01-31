@@ -1,7 +1,7 @@
 import os
 import shutil
 
-from Statistic import Statistic
+from Statistic import Statistic, Boxplotcurve, DoubleStats, SimpleStats
 
 MAX_LOSS = 5
 RUN_UPDATE_FREQUENCY = 1
@@ -15,15 +15,13 @@ class Logger:
             shutil.rmtree(directory_path, ignore_errors=True)
         os.makedirs(directory_path)
 
-        self.score = Statistic("run", "score", RUN_UPDATE_FREQUENCY, directory_path, header)
-        self.step = Statistic("run", "step", RUN_UPDATE_FREQUENCY, directory_path, header)
-        self.loss = Statistic("update", "loss", RUN_UPDATE_FREQUENCY, directory_path, header)
-        self.accuracy = Statistic("update", "accuracy", RUN_UPDATE_FREQUENCY, directory_path, header)
-        self.q = Statistic("update", "q", RUN_UPDATE_FREQUENCY, directory_path, header)
-        self.t_conf = Statistic("update", "t_conf", RUN_UPDATE_FREQUENCY, directory_path, header)
-        self.reward = Statistic("run", "reward", TRAINING_UPDATE_FREQUENCY, directory_path, header)
-        self.eval_loss = Statistic("update", "eval_loss", RUN_UPDATE_FREQUENCY, directory_path, header)
-        self.eval_acc = Statistic("run", "eval_acc", RUN_UPDATE_FREQUENCY, directory_path, header)
+        self.score = SimpleStats("run", "score", RUN_UPDATE_FREQUENCY, directory_path, header)
+        self.step = SimpleStats("run", "step", RUN_UPDATE_FREQUENCY, directory_path, header)
+        self.loss = DoubleStats("update", "loss", RUN_UPDATE_FREQUENCY, directory_path, header)
+        self.accuracy = DoubleStats("update", "accuracy", RUN_UPDATE_FREQUENCY, directory_path, header)
+        self.q = SimpleStats("update", "q", RUN_UPDATE_FREQUENCY, directory_path, header)
+        self.t_conf = SimpleStats("update", "t_conf", RUN_UPDATE_FREQUENCY, directory_path, header)
+        self.reward = Boxplotcurve("run", "reward", TRAINING_UPDATE_FREQUENCY, directory_path, header)
 
     def add_score(self, score):
         self.score.add_entry(score)
@@ -35,8 +33,9 @@ class Logger:
         self.accuracy.add_entry(accuracy)
 
     def add_loss(self, loss):
-        loss = min(MAX_LOSS, loss) # for clipping
-        self.loss.add_entry(loss)
+        l1 = min(MAX_LOSS, loss[0])
+        l2 = min(MAX_LOSS, loss[1])  # for clipping
+        self.loss.add_entry([l1, l2])
 
     def add_q(self, q):
         self.q.add_entry(q)
@@ -46,9 +45,3 @@ class Logger:
 
     def add_reward(self, r):
         self.reward.add_entry(r)
-
-    def add_eval_loss(self, eval_loss):
-        self.eval_loss.add_entry(eval_loss)
-
-    def add_eval_acc(self, eval_acc):
-        self.eval_acc.add_entry(eval_acc)

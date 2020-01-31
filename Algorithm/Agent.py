@@ -6,6 +6,8 @@ import numpy as np
 
 class Agent(ABC):
 
+    SAVE_INTERVAL = 10
+
     def __init__(self,
                  logger,
                  replay_buffer,
@@ -14,6 +16,7 @@ class Agent(ABC):
         self._replay_buffer = replay_buffer
         self.name = name
         self._t_conf = math.inf
+        self.rollout = 1
         super().__init__()
 
     @abstractmethod
