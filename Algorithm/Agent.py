@@ -36,13 +36,16 @@ class Agent(ABC):
         pass
 
     @abstractmethod
-    def load_model(self):
+    def load_model(self, rollout=1):
         pass
 
     def train(self, train_all=False):
         self._train(train_all=train_all)
+        self.save_model()
+        self.rollout += 1
         self._t_conf = self.get_tau_confidence()
         self._logger.add_t_conf(self._t_conf)
+        self._replay_buffer.save_experiences()
 
     def get_tau_confidence(self):
         if self._replay_buffer.get_experiences_length() == 0:
@@ -58,7 +61,9 @@ class Agent(ABC):
         if len(wrong_classified) == 0:
             return 0
 
-        return np.mean(wrong_classified)
+        print("percentage of wrong classified states: %f" % (len(wrong_classified) / 32.0))
+        print("mean: %f, std: %f" % (np.mean(wrong_classified), np.std(wrong_classified)))
+        return np.mean(wrong_classified) - np.std(wrong_classified)
 
     def agent_is_confident(self, state):
         action = self.get_action(state)
@@ -66,3 +71,6 @@ class Agent(ABC):
         t_conf = self._t_conf
         print("Get action: %d with confidence: %f. t_conf is %f" % (action, conf, t_conf))
         return t_conf < conf
+
+    def set_rollout(self, roll):
+        self.rollout = roll

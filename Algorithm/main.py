@@ -34,8 +34,8 @@ def argparser():
     parser.add_argument('--minibatch_size', default=32, type=int)
     parser.add_argument('--replay_memory_size', default=5000, type=int)  # +- 10 or 20 full games
     parser.add_argument('--discount_factor', default=0.99, type=float)
-    parser.add_argument('--mode', default='ddqn', type=str)
-    parser.add_argument('--max_episodes', default=31, type=int)  # 101
+    parser.add_argument('--mode', default='dqn', type=str)
+    parser.add_argument('--max_episodes', default=51, type=int)  # 101
     parser.add_argument('--max_expert_rollouts', default=1, type=int)
     parser.add_argument('--skip_frame_rate', default=4, type=int)
     parser.add_argument('--pause_gap', default=5, type=int)
@@ -112,7 +112,7 @@ def step(env, action, agent):
     return obs_buffer, total_reward, done, info
 
 
-def human_expert_act(replay_buffer, env, current_state):
+def human_expert_act(replay_buffer, env, current_state, logger):
     global frame, score, skip_frame_rate
     done = False
     while not done:
@@ -129,6 +129,9 @@ def human_expert_act(replay_buffer, env, current_state):
 
         score += r
         frame += 1
+        logger.add_expert_action(action)
+
+    logger.save_expert_action()
 
 
 def agent_act(agent, env, current_state):
@@ -144,39 +147,11 @@ def agent_act(agent, env, current_state):
         next_state = np.array(next_state)
 
         current_state = next_state
+        score += r
         frame += 1
     # reset for human expert
     if done:
-        env.reset()
-
-
-def evaluate_reward(agent, env, logger):
-    global score, scores, frame, skip_frame_rate
-    done = False
-    for _ in range(0, 10):
-        env.reset()
-        obs = preprocess_observation(env.reset(), img_size)
-        initial_buffer = []
-        for j in range(skip_frame_rate):
-            initial_buffer.append(obs)
-        current_state = np.array(initial_buffer)
-        reward = 0
-        # agent actions
-        done = False
-        while not done:
-            action = agent.get_action(np.asarray([current_state]))
-            next_state, r, done, info = step(env, action, agent)
-
-            next_state = np.array(next_state)
-
-            current_state = next_state
-
-            reward += r
-            frame += 1
-        logger.add_reward(reward)
-
-    # reset for human expert
-    if done:
+        score = 0
         env.reset()
 
 
@@ -242,8 +217,9 @@ def main(args):
                           minibatch_size,
                           logger)
 
-    agent.load_model()
-
+    agent.load_model(rollout=logger.get_rollouts())
+    if logger.get_rollouts() != 0:
+        agent.set_rollout(logger.get_rollouts() + 1)
     max_episodes = args.max_episodes
 
     # start algorithm
@@ -278,17 +254,14 @@ def main(args):
                 obs = preprocess_observation(env.reset(), img_size)
                 current_state = np.array([obs, obs, obs, obs])
 
-            human_expert_act(replay_buffer, env, current_state)
+            human_expert_act(replay_buffer, env, current_state, logger)
 
             evaluate_scores(logger)
 
         # train additional experience
         window_still_open = env.render()
         if window_still_open:
-            agent.train()
-
-        # evaluate reward
-        evaluate_reward(agent, env, logger)
+            agent.train(train_all=True)
 
 
 if __name__ == '__main__':

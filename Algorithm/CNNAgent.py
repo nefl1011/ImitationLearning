@@ -25,11 +25,10 @@ class CNNAgent(Agent):
             name=name)
 
     def _train(self, train_all=False):
-        self.rollout += 1
-        if train_all:
-            batch = self._replay_buffer.get_experiences()
-        else:
-            batch = self._replay_buffer.get_new_experiences()
+        # if train_all:
+        batch = self._replay_buffer.get_experiences()
+        # else:
+            # batch = self._replay_buffer.get_new_experiences()
 
         # store log data
         loss, accuracy, eval_loss, eval_acc = self.network.train(batch)
@@ -38,9 +37,6 @@ class CNNAgent(Agent):
 
         self._logger.add_loss([loss, eval_loss])
         self._logger.add_accuracy([accuracy, eval_acc])
-
-        if self.rollout % Agent.SAVE_INTERVAL == 0:
-            self.save_model()
 
     def get_action(self, state):
         return np.argmax(self.network.predict(state))
@@ -51,7 +47,7 @@ class CNNAgent(Agent):
         return np.random.choice(idxs)
 
     def save_model(self):
-        self.network.save(append='%s/model.h5' % self.name)
+        self.network.save(append='%s/model_%d.h5' % (self.name, self.rollout))
 
-    def load_model(self):
-        self.network.load('%s/model.h5' % self.name)
+    def load_model(self, rollout=1):
+        self.network.load('%s/model_%d.h5' % (self.name, rollout))

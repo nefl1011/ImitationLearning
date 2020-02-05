@@ -29,11 +29,10 @@ class DDQNAgent(DQNAgent):
         self._reset_target_network()
 
     def _train(self, train_all=False):
-        self.rollout += 1
-        if train_all:
-            batch = self._replay_buffer.get_experiences()
-        else:
-            batch = self._replay_buffer.get_new_experiences()
+        # if train_all:
+        batch = self._replay_buffer.get_experiences()
+        # else:
+            # batch = self._replay_buffer.get_new_experiences()
 
         # store log data
         loss, accuracy, mean_q_value, eval_loss, eval_acc = self.network.train(batch, self.target_network)
@@ -44,18 +43,16 @@ class DDQNAgent(DQNAgent):
         self._logger.add_accuracy([accuracy, eval_acc])
         self._logger.add_q(mean_q_value)
 
-        if self.rollout % Agent.SAVE_INTERVAL == 0:
-            self.save_model()
         if self.rollout % TARGET_NETWORK_UPDATE_FREQUENCY == 0:
             self._reset_target_network()
 
     def save_model(self):
-        self.network.save(append='%s/model.h5' % self.name)
-        self.target_network.save(append='%s/model_target.h5' % self.name)
+        self.network.save(append='%s/model_%d.h5' % (self.name, self.rollout))
+        self.target_network.save(append='%s/model_target_%d.h5' % (self.name, self.rollout))
 
-    def load_model(self):
-        self.network.load('%s/model.h5' % self.name)
-        self.target_network.load('%s/model_target.h5' % self.name)
+    def load_model(self, rollout=1):
+        self.network.load('%s/model_%d.h5' % (self.name, rollout))
+        self.target_network.load('%s/model_target_%d.h5' % (self.name, rollout))
 
     def _reset_target_network(self):
         self.target_network.model.set_weights(self.network.model.get_weights())

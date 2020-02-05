@@ -1,3 +1,4 @@
+import random
 from abc import ABC, abstractmethod
 from statistics import mean, stdev, median
 import os
@@ -108,7 +109,7 @@ class DoubleStats(Statistic):
                 y2.append(float(data[i][1]))
 
         plt.subplots()
-        plt.plot(x, y1,)
+        plt.plot(x, y1, )
         plt.plot(x, y2, color='orange')
 
         plt.title(self.header)
@@ -177,6 +178,74 @@ class Boxplotcurve(Statistic):
         plt.fill_between(x, med, quartil3, facecolor='cornflowerblue', interpolate=True)
         plt.fill_between(x, quartil1, minimum, facecolor='lightblue', interpolate=True)
         plt.fill_between(x, quartil3, maximum, facecolor='lightblue', interpolate=True)
+
+        plt.title(self.header)
+        plt.xlabel(x_label)
+        plt.ylabel(y_label)
+        # plt.legend(loc="upper left")
+        plt.savefig(output_path, bbox_inches="tight")
+        plt.close()
+
+
+class StackedBarGraph(Statistic):
+
+    def __init__(self, x_label, y_label, length, directory_path, header):
+        super(StackedBarGraph, self).__init__(
+            x_label,
+            y_label,
+            1,
+            directory_path,
+            header)
+        self.length = length
+        self.values = [0] * self.length
+
+    def add_entry(self, value):
+        self.values[value] += 1
+
+    def save(self):
+        self._save_csv(self.directory_path + self.y_label + ".csv", self.values)
+        self._save_png(input_path=self.directory_path + self.y_label + ".csv",
+                       output_path=self.directory_path + self.y_label + ".png",
+                       small_batch_length=self.update_frequency,
+                       big_batch_length=self.update_frequency * 10,
+                       x_label=self.x_label,
+                       y_label="actions")
+        self.values = [0] * self.length
+
+    def _save_png(self, input_path, output_path, small_batch_length, big_batch_length, x_label, y_label):
+        actions = []
+        with open(input_path, "r") as scores:
+            reader = csv.reader(scores)
+            data = list(reader)
+            x = range(1, len(data) + 1)
+            for i in range(0, len(data[0])):
+                y = []
+                for j in range(0, len(data)):
+                    y.append(float(data[j][i]))
+
+                actions.append(y)
+
+        totals = []
+        def sum_array(array2D, length):
+            new_array = []
+            for a in range(0, len(array2D[0])):
+                c = 0
+                for b in range(0, length):
+                    c += array2D[b][a]
+                new_array.append(c)
+            return new_array
+
+        totals = sum_array(actions, len(actions))
+
+        for i in range(0, len(actions)):
+            for j in range(0, len(actions[i])):
+                actions[i][j] = (actions[i][j] / totals[j]) * 100
+
+        plt.subplots()
+        plt.bar(x, actions[0])
+        for i in range(1, len(actions)):
+            test = sum_array(actions, i)
+            plt.bar(x, actions[i], bottom=test)
 
         plt.title(self.header)
         plt.xlabel(x_label)

@@ -37,11 +37,10 @@ class DQNAgent(Agent):
         return np.exp(q_values[max_q]) / np.sum(np.exp(q_values))
 
     def _train(self, train_all=False):
-        self.rollout += 1
-        if train_all:
-            batch = self._replay_buffer.get_experiences()
-        else:
-            batch = self._replay_buffer.get_new_experiences()
+        # if train_all:
+        batch = self._replay_buffer.get_experiences()
+        # else:
+            # batch = self._replay_buffer.get_new_experiences()
 
         # store log data
         loss, accuracy, mean_q_value, eval_loss, eval_acc = self.network.train(batch)
@@ -52,11 +51,8 @@ class DQNAgent(Agent):
         self._logger.add_accuracy([accuracy, eval_acc])
         self._logger.add_q(mean_q_value)
 
-        if self.rollout % Agent.SAVE_INTERVAL == 0:
-            self.save_model()
-
     def save_model(self):
-        self.network.save(append='%s/model.h5' % self.name)
+        self.network.save(append='%s/model_%d.h5' % (self.name, self.rollout))
 
-    def load_model(self):
-        self.network.load('%s/model.h5' % self.name)
+    def load_model(self, rollout=1):
+        self.network.load('%s/model_%d.h5' % (self.name, rollout))
