@@ -2,7 +2,7 @@ from Agent import Agent
 from DQNAgent import DQNAgent
 from DQNetwork import DQNetwork
 
-TARGET_NETWORK_UPDATE_FREQUENCY = 10
+TARGET_NETWORK_UPDATE_FREQUENCY = 5
 
 
 class DDQNAgent(DQNAgent):
@@ -14,7 +14,7 @@ class DDQNAgent(DQNAgent):
                  replay_buffer,
                  minibatch_size,
                  logger):
-        name = "ddqn"
+        name = "ddqn2"
 
         super(DDQNAgent, self).__init__(
             input_shape,
@@ -37,7 +37,7 @@ class DDQNAgent(DQNAgent):
         # store log data
         loss, accuracy, mean_q_value, eval_loss, eval_acc = self.network.train(batch, self.target_network)
 
-        self._replay_buffer.reset_new_experiences()
+        # self._replay_buffer.reset_new_experiences()
 
         self._logger.add_loss([loss, eval_loss])
         self._logger.add_accuracy([accuracy, eval_acc])

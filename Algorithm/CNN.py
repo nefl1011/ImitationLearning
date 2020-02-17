@@ -39,12 +39,14 @@ class CNN(Network):
 
         for datapoint in batch:
             rand_number = randrange(0, 101)
+            onehot = np.zeros(self.action_space)
+            onehot[datapoint['action']] = 1
             if rand_number > 10:
                 x_train.append(datapoint['source'].astype(np.float64))
-                target_train.append(datapoint['action'].astype(np.float64))
+                target_train.append(onehot)
             else:
                 x_test.append(datapoint['source'].astype(np.float64))
-                target_test.append(datapoint['action'].astype(np.float64))
+                target_test.append(onehot)
 
         x_train = np.asarray(x_train).squeeze()
         target_train = np.asarray(target_train).squeeze()

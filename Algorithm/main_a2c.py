@@ -9,6 +9,7 @@ import time
 import numpy as np
 from PIL import Image
 
+from A2CAgent import A2CAgent
 from CNNAgent import CNNAgent
 from DQNAgent import DQNAgent
 from Logger import Logger
@@ -37,8 +38,8 @@ def argparser():
     parser.add_argument('--minibatch_size', default=32, type=int)
     parser.add_argument('--replay_memory_size', default=7500, type=int)  # +- 10 full games
     parser.add_argument('--discount_factor', default=0.99, type=float)
-    parser.add_argument('--mode', default='ddqn2', type=str)
-    parser.add_argument('--max_episodes', default=72, type=int)  # 101
+    parser.add_argument('--mode', default='a2c', type=str)
+    parser.add_argument('--max_episodes', default=102, type=int)  # 101
     parser.add_argument('--max_expert_rollouts', default=1, type=int)
     parser.add_argument('--skip_frame_rate', default=4, type=int)
     parser.add_argument('--pause_gap', default=5, type=int)
@@ -109,7 +110,7 @@ def step(env, action, agent):
         total_reward += reward
         done = done | temp_done
         if agent == None:
-            time.sleep(0.025)
+            time.sleep(0.0125)
 
     return np.maximum(obs_buffer[skip_frame_rate - 2], obs_buffer[skip_frame_rate - 1]), total_reward, done, info
 
@@ -123,14 +124,11 @@ def human_expert_act(replay_buffer, env, current_state, logger, agent):
 
         clipped_reward = np.clip(r, -1, 1)
         replay_buffer.add_experience(obs, action, clipped_reward, done)
-        if mode == 'ppo':
-            agent.add_experience(clipped_reward, done, action)
+        agent.train(train_all=True)
 
         score += r
         frame += 1
         logger.add_expert_action(action)
-        if done and mode == 'ppo':
-            env.reset()
 
     logger.save_expert_action()
 
@@ -142,18 +140,15 @@ def agent_act(agent, env, current_state, replay_buffer):
 
     # agent actions
     while not done and agent.agent_is_confident(current_state):
-        action = agent.get_action(current_state)
+        action = agent.get_random_action(current_state)
 
         obs, r, done, info = step(env, action, agent)
 
-        current_state = np.asarray([[current_state[0][1], current_state[0][2], current_state[0][3], obs]])
+        clipped_reward = np.clip(r, -1, 1)
+        replay_buffer.add_experience(obs, action, clipped_reward, done)
+        agent.train(train_all=True)
 
-        rand_number = randrange(0, 101) / 100
-        if rand_number <= agent.get_t_conf():
-            clipped_reward = np.clip(r, -1, 1)
-            if mode != 'ppo':
-                replay_buffer.add_experience(obs, action, clipped_reward, done)
-                # agent.add_experience(np.asarray([current_state]), clipped_reward, done, action)
+        current_state = replay_buffer.get_last_skipped()
 
         score += r
         frame += 1
@@ -164,8 +159,6 @@ def agent_act(agent, env, current_state, replay_buffer):
         obs = preprocess_observation(env.reset(), img_size)
         current_state = np.maximum(obs, obs)
         replay_buffer.add_experience(current_state, 0, 0, False, initial=True)
-        if mode == 'ppo':
-            agent.add_experience(False, 0, 0)
 
 
 def evaluate_scores(logger):
@@ -195,46 +188,21 @@ def main(args):
     input_shape = (args.skip_frame_rate, 84, 84)  # formated image
     discount_factor = args.discount_factor
     minibatch_size = args.minibatch_size
-    replay_memory_size = args.replay_memory_size
+    replay_memory_size = args.replay_memory_size if mode != 'ppo' else 128
     img_size = (84, 84)
     skip_frame_rate = args.skip_frame_rate
     pause_seconds = args.pause_gap
     mode = args.mode
 
     logger = Logger(args.atari_game, "data/%s/log/" % mode)
-    replay_buffer = ReplayBuffer(replay_memory_size, minibatch_size)
+    replay_buffer = ReplayBuffer(128, minibatch_size)
 
-    if mode == 'dqn':
-        print("Using DQN agent")
-        agent = DQNAgent(input_shape,
-                         env.action_space.n,
-                         discount_factor,
-                         replay_buffer,
-                         minibatch_size,
-                         logger)
-    elif mode == 'cnn':
-        print("Using CNN agent")
-        agent = CNNAgent(input_shape,
-                         env.action_space.n,
-                         replay_buffer,
-                         minibatch_size,
-                         logger)
-    elif mode == 'ppo':
-        print("Using PPO agent")
-        agent = PPOAgent(input_shape,
-                         env.action_space.n,
-                         discount_factor,
-                         replay_buffer,
-                         minibatch_size,
-                         logger)
-    else:
-        print("Using DDQN agent")
-        agent = DDQNAgent(input_shape,
-                          env.action_space.n,
-                          discount_factor,
-                          replay_buffer,
-                          minibatch_size,
-                          logger)
+    agent = A2CAgent(input_shape,
+                     env.action_space.n,
+                     discount_factor,
+                     replay_buffer,
+                     minibatch_size,
+                     logger)
 
     agent.load_model(rollout=logger.get_rollouts())
     if logger.get_rollouts() != 0:
@@ -250,8 +218,6 @@ def main(args):
         obs = preprocess_observation(env.reset(), img_size)
         current_state = np.maximum(obs, obs)
         replay_buffer.add_experience(current_state, 0, 0, False, initial=True)
-        if mode == 'ppo':
-            agent.add_experience(False, 0, 0)
         frame = 0
         score = 0
 
@@ -282,12 +248,7 @@ def main(args):
 
             evaluate_scores(logger)
 
-        # train additional experience
-        window_still_open = env.render()
-        if window_still_open:
-            if mode == 'ppo':
-                agent.add_q_value()
-            agent.train(train_all=True)
+        agent.reset()
 
 
 if __name__ == '__main__':

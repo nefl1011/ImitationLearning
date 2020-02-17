@@ -2,6 +2,7 @@ import gym
 import numpy as np
 from PIL import Image
 
+from A2CAgent import A2CAgent
 from CNNAgent import CNNAgent
 from DDQNAgent import DDQNAgent
 from DQNAgent import DQNAgent
@@ -56,24 +57,21 @@ def main(args):
     replay_memory_size = args.replay_memory_size
     img_size = (84, 84)
     skip_frame_rate = args.skip_frame_rate
-    mode = 'ddqn'
+    mode = 'a2c'
 
     logger = Logger(args.atari_game, "data/%s/log/" % mode)
     replay_buffer = ReplayBuffer(replay_memory_size, minibatch_size)
 
-    rollout_max = 55
+    rollout_max = 62
 
+    agent = A2CAgent(input_shape,
+                     env.action_space.n,
+                     discount_factor,
+                     replay_buffer,
+                     minibatch_size,
+                     logger)
     for k in range(0, 1):
-        if k == 0:
-            print("Using DDQN agent")
-            agent = DDQNAgent(input_shape,
-                              env.action_space.n,
-                              discount_factor,
-                              replay_buffer,
-                              minibatch_size,
-                              logger)
-
-        for i in range(51, rollout_max):
+        for i in range(1, rollout_max):
             agent.load_model(rollout=i)
             print("current iteration: %d" % i)
             evaluate_agent(agent, env, logger)

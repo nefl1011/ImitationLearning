@@ -33,7 +33,7 @@ class CNNAgent(Agent):
         # store log data
         loss, accuracy, eval_loss, eval_acc = self.network.train(batch)
 
-        self._replay_buffer.reset_new_experiences()
+        # self._replay_buffer.reset_new_experiences()
 
         self._logger.add_loss([loss, eval_loss])
         self._logger.add_accuracy([accuracy, eval_acc])

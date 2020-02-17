@@ -2,7 +2,7 @@ import csv
 import os
 import shutil
 
-from Statistic import Statistic, Boxplotcurve, DoubleStats, SimpleStats, StackedBarGraph
+from Statistic import Statistic, Boxplotcurve, DoubleStats, SimpleStats, StackedBarGraph, BarGraph
 
 MAX_LOSS = 5
 RUN_UPDATE_FREQUENCY = 1
@@ -19,11 +19,13 @@ class Logger:
         self.step = SimpleStats("rollouts", "step", RUN_UPDATE_FREQUENCY, directory_path, header)
         self.loss = DoubleStats("rollouts", "loss", RUN_UPDATE_FREQUENCY, directory_path, header)
         self.accuracy = DoubleStats("rollouts", "accuracy", RUN_UPDATE_FREQUENCY, directory_path, header)
+        self.loss_critic = DoubleStats("rollouts", "loss_critic", RUN_UPDATE_FREQUENCY, directory_path, header)
+        self.accuracy_critic = DoubleStats("rollouts", "accuracy_critic", RUN_UPDATE_FREQUENCY, directory_path, header)
         self.q = SimpleStats("rollout", "q", RUN_UPDATE_FREQUENCY, directory_path, header)
         self.t_conf = SimpleStats("rollouts", "t_conf", RUN_UPDATE_FREQUENCY, directory_path, header)
         self.reward = Boxplotcurve("rollouts", "reward", TRAINING_UPDATE_FREQUENCY, directory_path, header)
         self.expert_action = StackedBarGraph("rollouts", "expert_actions", 18, directory_path, header)
-        self.agent_action = StackedBarGraph("rollouts", "agent_actions", 18, directory_path, header)
+        self.agent_action = BarGraph("rollouts", "agent_actions", 18, directory_path, header)
 
     def add_score(self, score):
         self.score.add_entry(score)
@@ -35,9 +37,17 @@ class Logger:
         self.accuracy.add_entry(accuracy)
 
     def add_loss(self, loss):
-        l1 = min(MAX_LOSS, loss[0])
-        l2 = min(MAX_LOSS, loss[1])  # for clipping
+        l1 = loss[0]
+        l2 = loss[1]  # for clipping
         self.loss.add_entry([l1, l2])
+
+    def add_accuracy_critic(self, accuracy):
+        self.accuracy_critic.add_entry(accuracy)
+
+    def add_loss_critic(self, loss):
+        l1 = loss[0]
+        l2 = loss[1]  # for clipping
+        self.loss_critic.add_entry([l1, l2])
 
     def add_q(self, q):
         self.q.add_entry(q)
@@ -60,8 +70,11 @@ class Logger:
     def save_agent_action(self):
         self.agent_action.save()
 
+    def save_agent_action_avg_std(self):
+        self.agent_action.save_avg_std()
+
     def get_rollouts(self):
-        path = self.directory_path + "loss.csv"
+        path = self.directory_path + "t_conf.csv"
         rollouts = 0
         if not os.path.exists(path):
             return rollouts

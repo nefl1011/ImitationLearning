@@ -35,6 +35,18 @@ class DQNAgent(Agent):
         max_q = np.random.choice(idxs)
         # boltzmann
         return np.exp(q_values[max_q]) / np.sum(np.exp(q_values))
+        """
+        q_values = self.network.predict(state)[0]
+        idxs = np.argwhere(q_values == np.max(q_values)).ravel()
+        max_q = np.random.choice(idxs)
+        # sigmoid
+        if q_values[max_q] >= 0:
+            z = np.exp(q_values[max_q])
+            return 1 / (1 + z)
+        else:
+            z = np.exp(q_values[max_q])
+            return z / (1 + z)
+        """
 
     def _train(self, train_all=False):
         # if train_all:
@@ -45,7 +57,7 @@ class DQNAgent(Agent):
         # store log data
         loss, accuracy, mean_q_value, eval_loss, eval_acc = self.network.train(batch)
 
-        self._replay_buffer.reset_new_experiences()
+        # self._replay_buffer.reset_new_experiences()
 
         self._logger.add_loss([loss, eval_loss])
         self._logger.add_accuracy([accuracy, eval_acc])

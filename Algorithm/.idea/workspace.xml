@@ -2,15 +2,25 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="82fd33ed-6bb6-47dc-91ba-4600227d4ee0" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/evaluation.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/A2CAgent.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ActorNetwork.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CriticNetwork.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/PPOAgent.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/a2c_eval.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/aTest.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/main_a2c.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Agent.py" beforeDir="false" afterPath="$PROJECT_DIR$/Agent.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CNN.py" beforeDir="false" afterPath="$PROJECT_DIR$/CNN.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CNNAgent.py" beforeDir="false" afterPath="$PROJECT_DIR$/CNNAgent.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DDQNAgent.py" beforeDir="false" afterPath="$PROJECT_DIR$/DDQNAgent.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DQNAgent.py" beforeDir="false" afterPath="$PROJECT_DIR$/DQNAgent.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Logger.py" beforeDir="false" afterPath="$PROJECT_DIR$/Logger.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Network.py" beforeDir="false" afterPath="$PROJECT_DIR$/Network.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ReplayBuffer.py" beforeDir="false" afterPath="$PROJECT_DIR$/ReplayBuffer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Statistic.py" beforeDir="false" afterPath="$PROJECT_DIR$/Statistic.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/evaluation.py" beforeDir="false" afterPath="$PROJECT_DIR$/evaluation.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -36,17 +46,22 @@
   <component name="ProjectId" id="1SQEZ8v6nPiHwqn0cngWYGC5Xnn" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$USER_HOME$/Desktop/Reinforcement-Learning-Tutorial-master/ddqn space" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/data/exp" />
     <property name="settings.editor.selected.configurable" value="vcs.Git" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\dev\ImitationLearning\Algorithm" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\dev\ImitationLearning\Algorithm\data" />
+      <recent name="C:\dev\ImitationLearning\Algorithm\data\ddqn2\exp" />
       <recent name="C:\dev\ImitationLearning\Algorithm" />
+      <recent name="C:\dev\ImitationLearning\Algorithm\data" />
       <recent name="C:\dev\ImitationLearning\Algorithm\data\models" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\dev\ImitationLearning\Algorithm\data\exp" />
+      <recent name="C:\dev\ImitationLearning\Algorithm\data\ddqn" />
+      <recent name="C:\dev\ImitationLearning\Algorithm\data\ddqn2" />
+      <recent name="C:\dev\ImitationLearning\Algorithm\data\ddqn\exp" />
+      <recent name="C:\dev\ImitationLearning\Algorithm\data\ppo" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -61,7 +76,28 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.main">
+  <component name="RunManager" selected="Python.main_a2c">
+    <configuration name="aTest" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="Algorithm" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/aTest.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="evaluation" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Algorithm" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -104,7 +140,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="run" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="main_a2c" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Algorithm" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -116,7 +152,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/run.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main_a2c.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -146,34 +182,13 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="train_data" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="Algorithm" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/train_data.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.test" />
-        <item itemvalue="Python.evaluation" />
+        <item itemvalue="Python.main_a2c" />
         <item itemvalue="Python.main" />
-        <item itemvalue="Python.run" />
-        <item itemvalue="Python.train_data" />
+        <item itemvalue="Python.evaluation" />
+        <item itemvalue="Python.test" />
+        <item itemvalue="Python.aTest" />
       </list>
     </recent_temporary>
   </component>
@@ -321,7 +336,14 @@
       <option name="project" value="LOCAL" />
       <updated>1580488657620</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="almost ready for dqn, ddqn, cnn">
+      <created>1580895731748</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1580895731748</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -386,6 +408,7 @@
     <MESSAGE value="done with dqn" />
     <MESSAGE value="new stats and added dqn, ddqn and cnn agents" />
     <MESSAGE value="better replaybuffer" />
-    <option name="LAST_COMMIT_MESSAGE" value="better replaybuffer" />
+    <MESSAGE value="almost ready for dqn, ddqn, cnn" />
+    <option name="LAST_COMMIT_MESSAGE" value="almost ready for dqn, ddqn, cnn" />
   </component>
 </project>

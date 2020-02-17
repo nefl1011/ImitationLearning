@@ -31,4 +31,5 @@ class Network(ABC):
 
     def load(self, path):
         if os.path.exists('data/%s' % path):
+            print(path)
             self.model = load_model('data/%s' % path)
