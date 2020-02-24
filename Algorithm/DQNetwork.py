@@ -46,7 +46,7 @@ class DQNetwork(Network):
 
         return K.mean(tf.where(cond, squared_loss, quadratic_loss))
 
-    def train(self, batch, target_network=None):
+    def train(self, batch, test_batch, target_network=None):
         x_train = []
         target_train = []
 
@@ -55,11 +55,7 @@ class DQNetwork(Network):
         max_q_values = []
 
         for datapoint in batch:
-            rand_number = randrange(0, 101)
-            if rand_number > 10:
-                x_train.append(datapoint['source'].astype(np.float64))
-            else:
-                x_test.append(datapoint['source'].astype(np.float64))
+            x_train.append(datapoint['source'].astype(np.float64))
 
             next_state = datapoint['dest'].astype(np.float64)
             if target_network == None:
@@ -75,10 +71,26 @@ class DQNetwork(Network):
             else:
                 t[datapoint['action']] = datapoint['reward'] + self.discount_factor * next_q_value
 
-            if rand_number > 10:
-                target_train.append(t)
+            target_train.append(t)
+
+        for datapoint in test_batch:
+            x_test.append(datapoint['source'].astype(np.float64))
+
+            next_state = datapoint['dest'].astype(np.float64)
+            if target_network == None:
+                next_state_predicition = self.predict(next_state).ravel()
             else:
-                target_test.append(t)
+                next_state_predicition = target_network.predict(next_state).ravel()
+            next_q_value = np.max(next_state_predicition)
+            max_q_values.append(next_q_value)
+
+            t = list(self.predict(datapoint['source'])[0])
+            if datapoint['final']:
+                t[datapoint['action']] = datapoint['reward']
+            else:
+                t[datapoint['action']] = datapoint['reward'] + self.discount_factor * next_q_value
+
+            target_test.append(t)
 
         x_train = np.asarray(x_train).squeeze()
         target_train = np.asarray(target_train).squeeze()

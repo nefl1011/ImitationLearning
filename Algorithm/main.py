@@ -12,7 +12,7 @@ from PIL import Image
 from CNNAgent import CNNAgent
 from DQNAgent import DQNAgent
 from Logger import Logger
-from DDQNAgent import DDQNAgent
+from DDQNAgent import DDQNAgent, TARGET_NETWORK_UPDATE_FREQUENCY
 from PPOAgent import PPOAgent
 from ReplayBuffer import ReplayBuffer
 
@@ -37,7 +37,7 @@ def argparser():
     parser.add_argument('--minibatch_size', default=32, type=int)
     parser.add_argument('--replay_memory_size', default=7500, type=int)  # +- 10 full games
     parser.add_argument('--discount_factor', default=0.99, type=float)
-    parser.add_argument('--mode', default='ddqn2', type=str)
+    parser.add_argument('--mode', default='ddqn', type=str)
     parser.add_argument('--max_episodes', default=72, type=int)  # 101
     parser.add_argument('--max_expert_rollouts', default=1, type=int)
     parser.add_argument('--skip_frame_rate', default=4, type=int)
@@ -90,12 +90,12 @@ def key_release(key, mod):
 
 
 def preprocess_observation(obs, img_size):
-    image = Image.fromarray(obs, 'RGB').convert('L').resize(img_size)
+    image = Image.fromarray(obs, 'RGB').convert('L').crop((10, 10, 150, 210)).resize(img_size)
     return np.asarray(image.getdata(), dtype=np.uint8).reshape(image.size[1], image.size[0])
 
 
 def step(env, action, agent):
-    global skip_frame_rate, img_size
+    global skip_frame_rate, img_size, human_agent_action, frame
     obs_buffer = []
     total_reward = 0.0
     done = False
@@ -111,31 +111,51 @@ def step(env, action, agent):
         if agent == None:
             time.sleep(0.025)
 
-    return np.maximum(obs_buffer[skip_frame_rate - 2], obs_buffer[skip_frame_rate - 1]), total_reward, done, info
+    diff = (obs_buffer[0] - obs_buffer[1]) + (obs_buffer[1] - obs_buffer[2]) + (obs_buffer[2] - obs_buffer[3])
+
+    return diff, total_reward, done, info
 
 
-def human_expert_act(replay_buffer, env, current_state, logger, agent):
-    global frame, score, skip_frame_rate
+def expert_pretrain(replay_buffer, logger, env, agent):
+    global frame, score, skip_frame_rate, human_agent_action
     done = False
+    obs = preprocess_observation(env.reset(), img_size)
+    current_state = np.maximum(obs, obs)
+    replay_buffer.add_experience(current_state, 0, 0, False, initial=True)
+
     while not done:
         action = human_agent_action
         obs, r, done, info = step(env, action, None)
 
         clipped_reward = np.clip(r, -1, 1)
         replay_buffer.add_experience(obs, action, clipped_reward, done)
-        if mode == 'ppo':
-            agent.add_experience(clipped_reward, done, action)
 
         score += r
         frame += 1
         logger.add_expert_action(action)
-        if done and mode == 'ppo':
-            env.reset()
 
     logger.save_expert_action()
+    agent.train(train_all=True)
 
 
-def agent_act(agent, env, current_state, replay_buffer):
+def human_expert_act(replay_buffer, env, current_state, logger, agent):
+    global frame, score, skip_frame_rate, human_agent_action
+    done = False
+    while not done and not agent.agent_is_confident(replay_buffer.get_last_skipped()):
+        action = human_agent_action
+        obs, r, done, info = step(env, action, None)
+        clipped_reward = np.clip(r, -1, 1)
+        replay_buffer.add_experience(obs, action, clipped_reward, done)
+
+        score += r
+        frame += 1
+        logger.add_expert_action(action)
+
+    # logger.save_expert_action()
+    return done
+
+
+def agent_act(agent, env, logger, replay_buffer):
     global score, scores, frame, skip_frame_rate, mode
     done = False
     current_state = replay_buffer.get_last_skipped()
@@ -143,29 +163,27 @@ def agent_act(agent, env, current_state, replay_buffer):
     # agent actions
     while not done and agent.agent_is_confident(current_state):
         action = agent.get_action(current_state)
-
+        logger.add_agent_action(action)
         obs, r, done, info = step(env, action, agent)
 
-        current_state = np.asarray([[current_state[0][1], current_state[0][2], current_state[0][3], obs]])
+        clipped_reward = np.clip(r, -1, 1)
+        replay_buffer.add_experience(obs, action, clipped_reward, done, is_expert=False)
 
-        rand_number = randrange(0, 101) / 100
-        if rand_number <= agent.get_t_conf():
-            clipped_reward = np.clip(r, -1, 1)
-            if mode != 'ppo':
-                replay_buffer.add_experience(obs, action, clipped_reward, done)
-                # agent.add_experience(np.asarray([current_state]), clipped_reward, done, action)
+        current_state = replay_buffer.get_last_skipped()
 
         score += r
         frame += 1
-
-    # reset for human expert
-    if done:
-        score = 0
-        obs = preprocess_observation(env.reset(), img_size)
-        current_state = np.maximum(obs, obs)
-        replay_buffer.add_experience(current_state, 0, 0, False, initial=True)
-        if mode == 'ppo':
-            agent.add_experience(False, 0, 0)
+        """
+        if done:
+            score = 0
+            frame = 0
+            obs = env.reset()
+            obs = preprocess_observation(obs, img_size)
+            obs = (obs - obs) + (obs - obs) + (obs - obs)
+            replay_buffer.add_experience(obs, 0, 0, False, initial=True, is_expert=False)
+            current_state = replay_buffer.get_last_skipped()
+        """
+    return done
 
 
 def evaluate_scores(logger):
@@ -241,52 +259,63 @@ def main(args):
         agent.set_rollout(logger.get_rollouts() + 1)
         start = logger.get_rollouts() + 1
     else:
-        start = 0
+        start = 1
     max_episodes = args.max_episodes
     print("previous rollouts: %d" % start)
-
-    # start algorithm
-    for episode in range(start, max_episodes):
-        obs = preprocess_observation(env.reset(), img_size)
-        current_state = np.maximum(obs, obs)
-        replay_buffer.add_experience(current_state, 0, 0, False, initial=True)
-        if mode == 'ppo':
-            agent.add_experience(False, 0, 0)
-        frame = 0
-        score = 0
-
-        # get agent action until not confident enough
-        agent_act(agent, env, current_state, replay_buffer)
-
-        # request fpr expert
+    """
+    if start == 1:
         print("Need Expert Demonstration in %d seconds!" % pause_seconds)
-        sec = args.pause_gap
-        # if episode > 0 and episode % 20 == 0:
-            # sec = 600
         while pause_seconds > 0:
             time.sleep(1)
             pause_seconds -= 1
             print(pause_seconds)
-        print("Begin!")
-        pause_seconds = sec
+        for i in range(5):
+            env.reset()
+            expert_pretrain(replay_buffer, logger, env, agent)
+    """
+    # TARGET_NETWORK_UPDATE_FREQUENCY = 10
+    # replay_buffer.reset_experiences()
 
-        # get expert actions until we are done
-        for i in range(0, args.max_expert_rollouts):
-            if i > 0:
-                score = 0
-                frame = 0
-                obs = preprocess_observation(env.reset(), img_size)
-                current_state = np.maximum(obs, obs)
+    # start algorithm
+    for episode in range(start, max_episodes):
+        obs = env.reset()
+        done = False
+        initial = True
+        frame = 0
+        score = 0
+        obs = preprocess_observation(obs, img_size)
+        current_state = (obs - obs) + (obs - obs) + (obs - obs)
 
-            human_expert_act(replay_buffer, env, current_state, logger, agent)
+        replay_buffer.add_experience(current_state, 0, 0, False, initial=initial)
 
-            evaluate_scores(logger)
+        # get agent action until not confident enough
+        while not done:
+            done = agent_act(agent, env, logger, replay_buffer)
+            if done:
+                break
+
+            # request fpr expert
+            sec = 3
+            print("Need Expert Demonstration in %d seconds!" % sec)
+            # if episode > 0 and episode % 20 == 0:
+                # sec = 600
+            while sec > 0:
+                time.sleep(1)
+                sec -= 1
+                print(sec)
+            print("Begin!")
+            # pause_seconds = sec
+
+            # get expert actions until we are done
+            done = human_expert_act(replay_buffer, env, current_state, logger, agent)
+
+        evaluate_scores(logger)
+        logger.save_expert_action()
+        logger.save_agent_action()
 
         # train additional experience
         window_still_open = env.render()
-        if window_still_open:
-            if mode == 'ppo':
-                agent.add_q_value()
+        if window_still_open: # and episode % 10 == 0:
             agent.train(train_all=True)
 
 

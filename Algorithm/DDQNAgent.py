@@ -14,7 +14,7 @@ class DDQNAgent(DQNAgent):
                  replay_buffer,
                  minibatch_size,
                  logger):
-        name = "ddqn2"
+        name = "ddqn"
 
         super(DDQNAgent, self).__init__(
             input_shape,
@@ -31,11 +31,12 @@ class DDQNAgent(DQNAgent):
     def _train(self, train_all=False):
         # if train_all:
         batch = self._replay_buffer.get_experiences()
+        test = self._replay_buffer.get_test_experiences()
         # else:
             # batch = self._replay_buffer.get_new_experiences()
 
         # store log data
-        loss, accuracy, mean_q_value, eval_loss, eval_acc = self.network.train(batch, self.target_network)
+        loss, accuracy, mean_q_value, eval_loss, eval_acc = self.network.train(batch, test, self.target_network)
 
         # self._replay_buffer.reset_new_experiences()
 
@@ -55,4 +56,5 @@ class DDQNAgent(DQNAgent):
         self.target_network.load('%s/model_target_%d.h5' % (self.name, rollout))
 
     def _reset_target_network(self):
+        print("reset target to model")
         self.target_network.model.set_weights(self.network.model.get_weights())

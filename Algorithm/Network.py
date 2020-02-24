@@ -18,7 +18,7 @@ class Network(ABC):
         super().__init__()
 
     @abstractmethod
-    def train(self, batch, target_network=None):
+    def train(self, batch, test_batch, target_network=None):
         pass
 
     def predict(self, state):

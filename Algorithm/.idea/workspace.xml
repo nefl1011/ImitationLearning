@@ -2,25 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="82fd33ed-6bb6-47dc-91ba-4600227d4ee0" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/A2CAgent.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ActorNetwork.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/CriticNetwork.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/PPOAgent.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/a2c_eval.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/aTest.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/main_a2c.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Agent.py" beforeDir="false" afterPath="$PROJECT_DIR$/Agent.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNN.py" beforeDir="false" afterPath="$PROJECT_DIR$/CNN.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CNNAgent.py" beforeDir="false" afterPath="$PROJECT_DIR$/CNNAgent.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/DDQNAgent.py" beforeDir="false" afterPath="$PROJECT_DIR$/DDQNAgent.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DQNAgent.py" beforeDir="false" afterPath="$PROJECT_DIR$/DQNAgent.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DQNetwork.py" beforeDir="false" afterPath="$PROJECT_DIR$/DQNetwork.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Logger.py" beforeDir="false" afterPath="$PROJECT_DIR$/Logger.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Network.py" beforeDir="false" afterPath="$PROJECT_DIR$/Network.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ReplayBuffer.py" beforeDir="false" afterPath="$PROJECT_DIR$/ReplayBuffer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Statistic.py" beforeDir="false" afterPath="$PROJECT_DIR$/Statistic.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/evaluation.py" beforeDir="false" afterPath="$PROJECT_DIR$/evaluation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/aTest.py" beforeDir="false" afterPath="$PROJECT_DIR$/aTest.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -76,7 +66,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.main_a2c">
+  <component name="RunManager" selected="Python.main">
     <configuration name="aTest" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Algorithm" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -184,11 +174,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.main_a2c" />
         <item itemvalue="Python.main" />
+        <item itemvalue="Python.aTest" />
+        <item itemvalue="Python.main_a2c" />
         <item itemvalue="Python.evaluation" />
         <item itemvalue="Python.test" />
-        <item itemvalue="Python.aTest" />
       </list>
     </recent_temporary>
   </component>
@@ -343,7 +333,14 @@
       <option name="project" value="LOCAL" />
       <updated>1580895731748</updated>
     </task>
-    <option name="localTasksCounter" value="21" />
+    <task id="LOCAL-00021" summary="Just DDQN now">
+      <created>1581937190731</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1581937190731</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -409,6 +406,7 @@
     <MESSAGE value="new stats and added dqn, ddqn and cnn agents" />
     <MESSAGE value="better replaybuffer" />
     <MESSAGE value="almost ready for dqn, ddqn, cnn" />
-    <option name="LAST_COMMIT_MESSAGE" value="almost ready for dqn, ddqn, cnn" />
+    <MESSAGE value="Just DDQN now" />
+    <option name="LAST_COMMIT_MESSAGE" value="Just DDQN now" />
   </component>
 </project>

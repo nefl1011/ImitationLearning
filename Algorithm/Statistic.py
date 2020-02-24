@@ -344,7 +344,10 @@ class BarGraph(Statistic):
 
         for i in range(0, len(actions)):
             for j in range(0, len(actions[i])):
-                actions[i][j] = (actions[i][j] / totals[j]) * 100
+                try:
+                    actions[i][j] = (actions[i][j] / totals[j]) * 100
+                except ZeroDivisionError:
+                    actions[i][j] = 0
 
         plt.subplots()
         plt.bar(x, actions[0])
@@ -366,7 +369,8 @@ class BarGraph(Statistic):
         plt.bar(x, self.values_avg, yerr=self.values_std)
 
         plt.title(self.header)
-        plt.xticks(x, ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17'))
+        plt.xticks(x,
+                   ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17'))
         plt.ylabel(y_label)
         # plt.legend(loc="upper left")
         plt.savefig(output_path, bbox_inches="tight")

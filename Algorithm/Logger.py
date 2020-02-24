@@ -26,6 +26,7 @@ class Logger:
         self.reward = Boxplotcurve("rollouts", "reward", TRAINING_UPDATE_FREQUENCY, directory_path, header)
         self.expert_action = StackedBarGraph("rollouts", "expert_actions", 18, directory_path, header)
         self.agent_action = BarGraph("rollouts", "agent_actions", 18, directory_path, header)
+        self.t_dist = SimpleStats("rollouts", "t_dist", RUN_UPDATE_FREQUENCY, directory_path, header)
 
     def add_score(self, score):
         self.score.add_entry(score)
@@ -54,6 +55,9 @@ class Logger:
 
     def add_t_conf(self, t_conf):
         self.t_conf.add_entry(t_conf)
+
+    def add_t_dist(self, t_dist):
+        self.t_dist.add_entry(t_dist)
 
     def add_reward(self, r):
         self.reward.add_entry(r)
