@@ -51,12 +51,12 @@ def main(args):
     replay_memory_size = args.replay_memory_size
     img_size = (84, 84)
     skip_frame_rate = args.skip_frame_rate
-    mode = 'ddqn2'
+    mode = 'ddqn'
 
     logger = Logger(args.atari_game, "data/%s/log/" % mode)
     replay_buffer = ReplayBuffer(replay_memory_size, minibatch_size)
 
-    rollout_max = 48
+    rollout_max = 11
 
     agent = DDQNAgent(input_shape,
                       env.action_space.n,
@@ -65,7 +65,7 @@ def main(args):
                       minibatch_size,
                       logger)
 
-    for i in range(47, rollout_max):
+    for i in range(10, rollout_max):
         agent.load_model(rollout=i)
         print("current iteration: %d" % i)
         run_agent(agent, env)

@@ -3,15 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="82fd33ed-6bb6-47dc-91ba-4600227d4ee0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Agent.py" beforeDir="false" afterPath="$PROJECT_DIR$/Agent.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DDQNAgent.py" beforeDir="false" afterPath="$PROJECT_DIR$/DDQNAgent.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DQNetwork.py" beforeDir="false" afterPath="$PROJECT_DIR$/DQNetwork.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Logger.py" beforeDir="false" afterPath="$PROJECT_DIR$/Logger.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Network.py" beforeDir="false" afterPath="$PROJECT_DIR$/Network.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ReplayBuffer.py" beforeDir="false" afterPath="$PROJECT_DIR$/ReplayBuffer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Statistic.py" beforeDir="false" afterPath="$PROJECT_DIR$/Statistic.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/aTest.py" beforeDir="false" afterPath="$PROJECT_DIR$/aTest.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -66,7 +58,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.main">
+  <component name="RunManager" selected="Python.test">
     <configuration name="aTest" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Algorithm" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -174,11 +166,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.test" />
         <item itemvalue="Python.main" />
         <item itemvalue="Python.aTest" />
         <item itemvalue="Python.main_a2c" />
         <item itemvalue="Python.evaluation" />
-        <item itemvalue="Python.test" />
       </list>
     </recent_temporary>
   </component>
@@ -340,7 +332,14 @@
       <option name="project" value="LOCAL" />
       <updated>1581937190731</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="updated algorithm">
+      <created>1582568080312</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1582568080313</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -407,6 +406,7 @@
     <MESSAGE value="better replaybuffer" />
     <MESSAGE value="almost ready for dqn, ddqn, cnn" />
     <MESSAGE value="Just DDQN now" />
-    <option name="LAST_COMMIT_MESSAGE" value="Just DDQN now" />
+    <MESSAGE value="updated algorithm" />
+    <option name="LAST_COMMIT_MESSAGE" value="updated algorithm" />
   </component>
 </project>
