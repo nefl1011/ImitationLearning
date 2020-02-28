@@ -3,7 +3,47 @@
   <component name="ChangeListManager">
     <list default="true" id="82fd33ed-6bb6-47dc-91ba-4600227d4ee0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ReplayBuffer.py" beforeDir="false" afterPath="$PROJECT_DIR$/ReplayBuffer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/log/accuracy.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/log/accuracy.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/log/agent_actions1.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/log/agent_actions1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/log/expert_actions.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/log/expert_actions.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/log/loss.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/log/loss.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/log/q.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/log/q.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/log/score.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/log/score.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/log/t_conf.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/log/t_conf.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/model_1.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/model_10.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/model_11.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/model_2.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/model_3.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/model_4.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/model_5.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/model_6.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/model_7.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/model_8.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/model_9.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/model_target_1.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/model_target_10.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/model_target_11.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/model_target_2.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/model_target_3.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/model_target_4.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/model_target_5.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/model_target_6.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/model_target_7.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/model_target_8.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ddqn/model_target_9.h5" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/exp/experiences.npy" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/exp/test_experiences.npy" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/evaluation.py" beforeDir="false" afterPath="$PROJECT_DIR$/evaluation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -32,18 +72,19 @@
     <property name="settings.editor.selected.configurable" value="vcs.Git" />
   </component>
   <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\dev\ImitationLearning\Algorithm\data\ddqn2\exp" />
-      <recent name="C:\dev\ImitationLearning\Algorithm" />
-      <recent name="C:\dev\ImitationLearning\Algorithm\data" />
-      <recent name="C:\dev\ImitationLearning\Algorithm\data\models" />
-    </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\dev\ImitationLearning\Algorithm\data\exp" />
       <recent name="C:\dev\ImitationLearning\Algorithm\data\ddqn" />
       <recent name="C:\dev\ImitationLearning\Algorithm\data\ddqn2" />
       <recent name="C:\dev\ImitationLearning\Algorithm\data\ddqn\exp" />
       <recent name="C:\dev\ImitationLearning\Algorithm\data\ppo" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\dev\ImitationLearning\Algorithm\data\ddqn\log\agent_actions" />
+      <recent name="C:\dev\ImitationLearning\Algorithm\data\ddqn2\exp" />
+      <recent name="C:\dev\ImitationLearning\Algorithm" />
+      <recent name="C:\dev\ImitationLearning\Algorithm\data" />
+      <recent name="C:\dev\ImitationLearning\Algorithm\data\models" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -58,7 +99,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.test">
+  <component name="RunManager" selected="Python.main">
     <configuration name="aTest" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Algorithm" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -166,11 +207,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.test" />
         <item itemvalue="Python.main" />
+        <item itemvalue="Python.evaluation" />
+        <item itemvalue="Python.test" />
         <item itemvalue="Python.aTest" />
         <item itemvalue="Python.main_a2c" />
-        <item itemvalue="Python.evaluation" />
       </list>
     </recent_temporary>
   </component>

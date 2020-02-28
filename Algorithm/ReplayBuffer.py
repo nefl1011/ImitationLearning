@@ -26,10 +26,18 @@ class ReplayBuffer:
         return len(self._experiences)
 
     def get_experiences(self):
-        return self._experiences
+        batch = []
+        for i in range(128):
+            batch.append(self._experiences[randrange(0, len(self._experiences))])
+        return batch
+        # return self._experiences
 
     def get_test_experiences(self):
-        return self._test_experiences
+        batch = []
+        for i in range(128):
+            batch.append(self._test_experiences[randrange(0, len(self._test_experiences))])
+        return batch
+        # return self._test_experiences
 
     # def get_new_experiences(self):
     # return self._new_experiences

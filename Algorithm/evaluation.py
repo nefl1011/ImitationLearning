@@ -1,3 +1,6 @@
+import sys
+import time
+
 import gym
 import numpy as np
 from PIL import Image
@@ -8,10 +11,30 @@ from DQNAgent import DQNAgent
 from Logger import Logger
 from PPOAgent import PPOAgent
 from ReplayBuffer import ReplayBuffer
-from main import step, preprocess_observation, argparser
+from main import preprocess_observation, argparser
 
 img_size = (84, 84)
 skip_frame_rate = 4
+
+
+def step(env, action, agent):
+    global skip_frame_rate, img_size, human_agent_action, frame
+    obs_buffer = []
+    total_reward = 0.0
+    done = False
+    for i in range(skip_frame_rate):
+        window_still_open = env.render()
+        if not window_still_open:
+            sys.exit("Exit")
+
+        obs, reward, temp_done, info = env.step(action)
+        obs_buffer.append(preprocess_observation(obs, img_size))
+        total_reward += reward
+        done = done | temp_done
+
+    diff = (obs_buffer[0] - obs_buffer[1]) + (obs_buffer[1] - obs_buffer[2]) + (obs_buffer[2] - obs_buffer[3])
+
+    return diff, total_reward, done, info
 
 
 def evaluate_agent(agent, env, logger):
@@ -58,7 +81,7 @@ def main(args):
     skip_frame_rate = args.skip_frame_rate
     mode = 'ddqn'
 
-    logger = Logger(args.atari_game, "data/%s/log/" % mode)
+    logger = Logger(args.atari_game, "data/%s/log/agent_actions/" % mode)
     replay_buffer = ReplayBuffer(replay_memory_size, minibatch_size)
 
     rollout_max = 55
@@ -73,7 +96,7 @@ def main(args):
                               minibatch_size,
                               logger)
 
-        for i in range(51, rollout_max):
+        for i in range(46, 63):
             agent.load_model(rollout=i)
             print("current iteration: %d" % i)
             evaluate_agent(agent, env, logger)

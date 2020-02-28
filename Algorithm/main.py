@@ -108,8 +108,8 @@ def step(env, action, agent):
         obs_buffer.append(preprocess_observation(obs, img_size))
         total_reward += reward
         done = done | temp_done
-        if agent == None:
-            time.sleep(0.025)
+
+        time.sleep(0.025)
 
     diff = (obs_buffer[0] - obs_buffer[1]) + (obs_buffer[1] - obs_buffer[2]) + (obs_buffer[2] - obs_buffer[3])
 
@@ -141,7 +141,8 @@ def expert_pretrain(replay_buffer, logger, env, agent):
 def human_expert_act(replay_buffer, env, current_state, logger, agent):
     global frame, score, skip_frame_rate, human_agent_action
     done = False
-    while not done and not agent.agent_is_confident(replay_buffer.get_last_skipped()):
+    # i = 0
+    while not done and not agent.agent_is_confident(replay_buffer.get_last_skipped()):  # or i < 16:
         action = human_agent_action
         obs, r, done, info = step(env, action, None)
         clipped_reward = np.clip(r, -1, 1)
@@ -150,6 +151,7 @@ def human_expert_act(replay_buffer, env, current_state, logger, agent):
         score += r
         frame += 1
         logger.add_expert_action(action)
+        # i += 1
 
     # logger.save_expert_action()
     return done
@@ -308,6 +310,13 @@ def main(args):
 
             # get expert actions until we are done
             done = human_expert_act(replay_buffer, env, current_state, logger, agent)
+            sec = 3
+            print("Agent action in %d seconds!" % sec)
+            while sec > 0:
+                time.sleep(1)
+                sec -= 1
+                print(sec)
+            print("Begin!")
 
         evaluate_scores(logger)
         logger.save_expert_action()
