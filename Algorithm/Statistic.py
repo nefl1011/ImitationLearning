@@ -130,9 +130,11 @@ class Boxplotcurve(Statistic):
             update_frequency,
             directory_path,
             header)
+        self._rollouts = 132
 
     def add_entry(self, value):
         self.values.append(value)
+        self._save_csv(self.directory_path + self.y_label + "_%d.csv" % self._rollouts, [value])
         if len(self.values) % self.update_frequency == 0:
             mean_value = mean(self.values)
             med = median(self.values)
@@ -150,6 +152,7 @@ class Boxplotcurve(Statistic):
                            x_label=self.x_label,
                            y_label=self.y_label)
             self.values = []
+            self._rollouts += 1
 
     def _save_png(self, input_path, output_path, small_batch_length, big_batch_length, x_label, y_label):
         x = []
@@ -270,7 +273,7 @@ class BarGraph(Statistic):
         self.values = [0] * self.length
         self.values_avg = [0] * self.length
         self.values_std = [0] * self.length
-        self.rollouts = 1
+        self.rollouts = 132
 
     def add_entry(self, value):
         self.values[value] += 1

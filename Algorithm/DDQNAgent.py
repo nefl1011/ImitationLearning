@@ -13,8 +13,8 @@ class DDQNAgent(DQNAgent):
                  discount_factor,
                  replay_buffer,
                  minibatch_size,
-                 logger):
-        name = "ddqn"
+                 logger,
+                 name):
 
         super(DDQNAgent, self).__init__(
             input_shape,
@@ -48,12 +48,12 @@ class DDQNAgent(DQNAgent):
             self._reset_target_network()
 
     def save_model(self):
-        self.network.save(append='%s/model_%d.h5' % (self.name, self.rollout))
-        self.target_network.save(append='%s/model_target_%d.h5' % (self.name, self.rollout))
+        self.network.save(append='%s/models/model_%d.h5' % (self.name, self.rollout))
+        self.target_network.save(append='%s/models/model_target_%d.h5' % (self.name, self.rollout))
 
     def load_model(self, rollout=1):
-        self.network.load('%s/model_%d.h5' % (self.name, rollout))
-        self.target_network.load('%s/model_target_%d.h5' % (self.name, rollout))
+        self.network.load('%s/models/model_%d.h5' % (self.name, rollout))
+        self.target_network.load('%s/models/model_target_%d.h5' % (self.name, rollout))
 
     def _reset_target_network(self):
         print("reset target to model")

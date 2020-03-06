@@ -35,10 +35,10 @@ def argparser():
     parser.add_argument('--atari_game', help='name of an atari game supported by gym', default='Centipede-v4')
     parser.add_argument('--savedir', help='name of directory to save model', default='data/models/')
     parser.add_argument('--minibatch_size', default=32, type=int)
-    parser.add_argument('--replay_memory_size', default=7500, type=int)  # +- 10 full games
+    parser.add_argument('--replay_memory_size', default=1024, type=int)  # +- 10 full games
     parser.add_argument('--discount_factor', default=0.99, type=float)
     parser.add_argument('--mode', default='ddqn', type=str)
-    parser.add_argument('--max_episodes', default=72, type=int)  # 101
+    parser.add_argument('--max_episodes', default=302, type=int)  # 101
     parser.add_argument('--max_expert_rollouts', default=1, type=int)
     parser.add_argument('--skip_frame_rate', default=4, type=int)
     parser.add_argument('--pause_gap', default=5, type=int)
@@ -113,7 +113,7 @@ def step(env, action, agent):
 
     diff = (obs_buffer[0] - obs_buffer[1]) + (obs_buffer[1] - obs_buffer[2]) + (obs_buffer[2] - obs_buffer[3])
 
-    return diff, total_reward, done, info
+    return np.maximum(obs_buffer[2], obs_buffer[3]), total_reward, done, info
 
 
 def expert_pretrain(replay_buffer, logger, env, agent):
@@ -146,6 +146,8 @@ def human_expert_act(replay_buffer, env, current_state, logger, agent):
         action = human_agent_action
         obs, r, done, info = step(env, action, None)
         clipped_reward = np.clip(r, -1, 1)
+
+        print("expert chose action: %d" % human_agent_action)
         replay_buffer.add_experience(obs, action, clipped_reward, done)
 
         score += r
@@ -169,7 +171,9 @@ def agent_act(agent, env, logger, replay_buffer):
         obs, r, done, info = step(env, action, agent)
 
         clipped_reward = np.clip(r, -1, 1)
-        replay_buffer.add_experience(obs, action, clipped_reward, done, is_expert=False)
+
+        print("expert chose action: %d" % human_agent_action)
+        replay_buffer.add_experience(obs, human_agent_action, clipped_reward, done)
 
         current_state = replay_buffer.get_last_skipped()
 
@@ -196,6 +200,17 @@ def evaluate_scores(logger):
     score = 0
 
 
+def wrap_reward(action, reward):
+    if reward == 1.0:
+        return 1.0
+    if action == 0 or action == 3 or action == 4:
+        return 0.25
+    elif action == 2 or action == 5:
+        return 0.05
+
+    return 0.0
+
+
 def main(args):
     global human_agent_action, img_size, frame, score, scores, skip_frame_rate, pause_seconds, mode
 
@@ -219,44 +234,22 @@ def main(args):
     img_size = (84, 84)
     skip_frame_rate = args.skip_frame_rate
     pause_seconds = args.pause_gap
-    mode = args.mode
+    mode = "conf_dagger"
 
     logger = Logger(args.atari_game, "data/%s/log/" % mode)
     replay_buffer = ReplayBuffer(replay_memory_size, minibatch_size)
 
-    if mode == 'dqn':
-        print("Using DQN agent")
-        agent = DQNAgent(input_shape,
-                         env.action_space.n,
-                         discount_factor,
-                         replay_buffer,
-                         minibatch_size,
-                         logger)
-    elif mode == 'cnn':
-        print("Using CNN agent")
-        agent = CNNAgent(input_shape,
-                         env.action_space.n,
-                         replay_buffer,
-                         minibatch_size,
-                         logger)
-    elif mode == 'ppo':
-        print("Using PPO agent")
-        agent = PPOAgent(input_shape,
-                         env.action_space.n,
-                         discount_factor,
-                         replay_buffer,
-                         minibatch_size,
-                         logger)
-    else:
-        print("Using DDQN agent")
-        agent = DDQNAgent(input_shape,
-                          env.action_space.n,
-                          discount_factor,
-                          replay_buffer,
-                          minibatch_size,
-                          logger)
+    print("Using DDQN agent")
+    agent = DDQNAgent(input_shape,
+                      6,
+                      discount_factor,
+                      replay_buffer,
+                      minibatch_size,
+                      logger,
+                      mode)
 
     agent.load_model(rollout=logger.get_rollouts())
+    agent.set_tau_conf()
     if logger.get_rollouts() != 0:
         agent.set_rollout(logger.get_rollouts() + 1)
         start = logger.get_rollouts() + 1
@@ -288,35 +281,29 @@ def main(args):
         obs = preprocess_observation(obs, img_size)
         current_state = (obs - obs) + (obs - obs) + (obs - obs)
 
-        replay_buffer.add_experience(current_state, 0, 0, False, initial=initial)
+        replay_buffer.add_experience(obs, 0, 0, False, initial=initial)
 
         # get agent action until not confident enough
         while not done:
-            done = agent_act(agent, env, logger, replay_buffer)
-            if done:
-                break
+            if agent.agent_is_confident(replay_buffer.get_last_skipped()):
+                action = agent.get_action(replay_buffer.get_last_skipped())
+                print("agent action: %d" % action)
+                logger.add_agent_action(action)
+                is_expert_action = False
+            else:
+                log_action = agent.get_action(replay_buffer.get_last_skipped())
+                logger.add_agent_action(log_action)
+                action = human_agent_action
+                is_expert_action = True
 
-            # request fpr expert
-            sec = 3
-            print("Need Expert Demonstration in %d seconds!" % sec)
-            # if episode > 0 and episode % 20 == 0:
-                # sec = 600
-            while sec > 0:
-                time.sleep(1)
-                sec -= 1
-                print(sec)
-            print("Begin!")
-            # pause_seconds = sec
+            obs, r, done, info = step(env, action, None)
+            clipped_reward = np.clip(r, -1, 1)
 
-            # get expert actions until we are done
-            done = human_expert_act(replay_buffer, env, current_state, logger, agent)
-            sec = 3
-            print("Agent action in %d seconds!" % sec)
-            while sec > 0:
-                time.sleep(1)
-                sec -= 1
-                print(sec)
-            print("Begin!")
+            print("expert chose action: %d" % human_agent_action)
+            replay_buffer.add_experience(obs, human_agent_action, clipped_reward, done)
+            logger.add_expert_action(human_agent_action)
+            score += r
+            frame += 1
 
         evaluate_scores(logger)
         logger.save_expert_action()
@@ -324,7 +311,7 @@ def main(args):
 
         # train additional experience
         window_still_open = env.render()
-        if window_still_open: # and episode % 10 == 0:
+        if window_still_open:  # and episode % 10 == 0:
             agent.train(train_all=True)
 
 

@@ -27,11 +27,12 @@ class CNNAgent(Agent):
     def _train(self, train_all=False):
         # if train_all:
         batch = self._replay_buffer.get_experiences()
+        test_batch = self._replay_buffer.get_test_experiences()
         # else:
             # batch = self._replay_buffer.get_new_experiences()
 
         # store log data
-        loss, accuracy, eval_loss, eval_acc = self.network.train(batch)
+        loss, accuracy, eval_loss, eval_acc = self.network.train(batch, test_batch)
 
         # self._replay_buffer.reset_new_experiences()
 
@@ -43,8 +44,7 @@ class CNNAgent(Agent):
 
     def _get_action_confidence(self, state):
         values = self.network.predict(state)[0]
-        idxs = np.argwhere(values == np.max(values)).ravel()
-        return np.random.choice(idxs)
+        return np.max(values)
 
     def save_model(self):
         self.network.save(append='%s/model_%d.h5' % (self.name, self.rollout))

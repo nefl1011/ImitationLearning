@@ -30,7 +30,7 @@ class CNN(Network):
         self.model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
         # self.model.summary()  # prints model in console
 
-    def train(self, batch, target_network=None):
+    def train(self, batch, test_batch, target_network=None):
         x_train = []
         target_train = []
 
@@ -38,15 +38,16 @@ class CNN(Network):
         target_test = []
 
         for datapoint in batch:
-            rand_number = randrange(0, 101)
             onehot = np.zeros(self.action_space)
             onehot[datapoint['action']] = 1
-            if rand_number > 10:
-                x_train.append(datapoint['source'].astype(np.float64))
-                target_train.append(onehot)
-            else:
-                x_test.append(datapoint['source'].astype(np.float64))
-                target_test.append(onehot)
+            x_train.append(datapoint['source'].astype(np.float64))
+            target_train.append(onehot)
+
+        for datapoint in test_batch:
+            onehot = np.zeros(self.action_space)
+            onehot[datapoint['action']] = 1
+            x_test.append(datapoint['source'].astype(np.float64))
+            target_test.append(onehot)
 
         x_train = np.asarray(x_train).squeeze()
         target_train = np.asarray(target_train).squeeze()

@@ -72,12 +72,13 @@ class PPOAgent(Agent):
 
     def _get_action_confidence(self, state):
         probabilites = self.actor.predict(state)[0]
+        print(probabilites)
         return np.max(probabilites)
 
     def get_advantages(slef, values, masks, rewards):
         returns = []
         gae = 0
-        for i in reversed(range(len(rewards))):
+        for i in reversed(range(len(values)-1)):
             delta = rewards[i] + GAMMA * values[i + 1] * int(masks[i]) - values[i]
             gae = delta + GAMMA * LAMBDA * int(masks[i]) * gae
             returns.insert(0, gae + values[i])
@@ -87,15 +88,15 @@ class PPOAgent(Agent):
 
     def _train(self, train_all=False):
         returns, advantages = self.get_advantages(self.values, self.masks, self.rewards)
-        actions_onehot_reshaped = np.reshape(self.actions_onehot, newshape=(-1, 18))
+        actions_onehot_reshaped = np.reshape(self.actions_onehot, newshape=(-1, 6))
         rewards_reshaped = np.reshape(self.rewards, newshape=(-1, 1, 1))
         q_vals = self.values[:-1]
         actor_fit = self.actor.model.fit(
-            [self.states, self.actions_probs, advantages, rewards_reshaped, q_vals], [actions_onehot_reshaped],
+            [self.states[:-1], self.actions_probs[:-1], advantages, rewards_reshaped[:-1], q_vals], [actions_onehot_reshaped[:-1]],
             shuffle=True, verbose=True, epochs=8)
 
         return_vals_reshaped = np.reshape(returns, newshape=(-1, 1))
-        critic_fit = self.critic.model.fit([self.states], [return_vals_reshaped], shuffle=True, verbose=True, epochs=8)
+        critic_fit = self.critic.model.fit([self.states[:-1]], [return_vals_reshaped], shuffle=True, verbose=True, epochs=8)
 
         print(actor_fit.history)
         print(critic_fit.history)

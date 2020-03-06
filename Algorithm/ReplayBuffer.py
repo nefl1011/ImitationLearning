@@ -113,15 +113,16 @@ class ReplayBuffer:
         return self._experiences[indx]
 
     def save_experiences(self):
-        np.save("data/exp/experiences.npy", self._experiences)
-        np.save("data/exp/test_experiences.npy", self._test_experiences)
+        np.save("data/conf_dagger/exp/experiences.npy", self._experiences)
+        np.save("data/conf_dagger/exp/test_experiences.npy", self._test_experiences)
 
     def reset_experiences(self):
         self._experiences = []
+        self._test_experiences = []
 
     def load_experiences(self):
         try:
-            self._experiences = np.load("data/exp/experiences.npy", allow_pickle=True).tolist()
-            self._test_experiences = np.load("data/exp/test_experiences.npy", allow_pickle=True).tolist()
+            self._experiences = np.load("data/conf_dagger/exp/experiences.npy", allow_pickle=True).tolist()
+            self._test_experiences = np.load("data/conf_dagger/exp/test_experiences.npy", allow_pickle=True).tolist()
         except IOError as io_err:
             print("Can't load experience file. Maybe not created yet.")

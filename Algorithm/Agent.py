@@ -46,6 +46,8 @@ class Agent(ABC):
         self._train(train_all=train_all)
         self.save_model()
         self.rollout += 1
+        if self.rollout % 10 == 0:
+            self._replay_buffer.reset_experiences()
         self._t_conf = self.get_tau_confidence()
         # self._t_dist = self.calculate_tau_distance() * 3
         self._logger.add_t_conf(self._t_conf)
@@ -124,3 +126,6 @@ class Agent(ABC):
             compared_state = datapoint['source'].astype(np.float64)[0][3]
             distance.append(self.calculate_distance(state, compared_state))
         return np.mean(distance)
+
+    def set_tau_conf(self):
+        self._t_conf = self.get_tau_confidence()
