@@ -38,7 +38,7 @@ def argparser():
     parser.add_argument('--replay_memory_size', default=1024, type=int)  # +- 10 full games
     parser.add_argument('--discount_factor', default=0.99, type=float)
     parser.add_argument('--mode', default='ddqn', type=str)
-    parser.add_argument('--max_episodes', default=302, type=int)  # 101
+    parser.add_argument('--max_episodes', default=513, type=int)  # 101
     parser.add_argument('--max_expert_rollouts', default=1, type=int)
     parser.add_argument('--skip_frame_rate', default=4, type=int)
     parser.add_argument('--pause_gap', default=5, type=int)
@@ -88,9 +88,20 @@ def key_release(key, mod):
     if human_agent_action == a:
         human_agent_action = 0
 
-
+#number = 0
 def preprocess_observation(obs, img_size):
+    #global number
+    #print(number)
+    #img_rgb = Image.fromarray(obs, 'RGB')
+    #img_g = Image.fromarray(obs, 'RGB').convert('L')
+    #img_c = Image.fromarray(obs, 'RGB').convert('L').crop((10, 10, 150, 210))
     image = Image.fromarray(obs, 'RGB').convert('L').crop((10, 10, 150, 210)).resize(img_size)
+    #print()
+    #img_rgb.save("data/img/rgb/img_%d.jpg" % number)
+    #img_g.save("data/img/greyscale/img_%d.jpg" % number)
+    #img_c.save("data/img/cropped/img_%d.jpg" % number)
+    #image.save("data/img/resize/img_%d.jpg" % number)
+    #number += 1
     return np.asarray(image.getdata(), dtype=np.uint8).reshape(image.size[1], image.size[0])
 
 
@@ -247,6 +258,20 @@ def main(args):
                       minibatch_size,
                       logger,
                       mode)
+    """
+    expert = DDQNAgent(input_shape,
+                      6,
+                      discount_factor,
+                      replay_buffer,
+                      minibatch_size,
+                      logger,
+                      mode)
+    expert.load_model(rollout=0)
+    """
+    expert = None
+    if expert == None:
+        env.unwrapped.viewer.window.on_key_press = key_press
+        env.unwrapped.viewer.window.on_key_release = key_release
 
     agent.load_model(rollout=logger.get_rollouts())
     agent.set_tau_conf()
@@ -257,19 +282,6 @@ def main(args):
         start = 1
     max_episodes = args.max_episodes
     print("previous rollouts: %d" % start)
-    """
-    if start == 1:
-        print("Need Expert Demonstration in %d seconds!" % pause_seconds)
-        while pause_seconds > 0:
-            time.sleep(1)
-            pause_seconds -= 1
-            print(pause_seconds)
-        for i in range(5):
-            env.reset()
-            expert_pretrain(replay_buffer, logger, env, agent)
-    """
-    # TARGET_NETWORK_UPDATE_FREQUENCY = 10
-    # replay_buffer.reset_experiences()
 
     # start algorithm
     for episode in range(start, max_episodes):
@@ -293,7 +305,11 @@ def main(args):
             else:
                 log_action = agent.get_action(replay_buffer.get_last_skipped())
                 logger.add_agent_action(log_action)
-                action = human_agent_action
+                if expert == None:
+                    action = human_agent_action
+                else:
+                    action = expert.get_action(replay_buffer.get_last_skipped())
+                    human_agent_action = action
                 is_expert_action = True
 
             obs, r, done, info = step(env, action, None)

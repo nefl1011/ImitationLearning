@@ -130,7 +130,7 @@ class Boxplotcurve(Statistic):
             update_frequency,
             directory_path,
             header)
-        self._rollouts = 132
+        self._rollouts = 1
 
     def add_entry(self, value):
         self.values.append(value)
@@ -273,7 +273,7 @@ class BarGraph(Statistic):
         self.values = [0] * self.length
         self.values_avg = [0] * self.length
         self.values_std = [0] * self.length
-        self.rollouts = 132
+        self.rollouts = 1
 
     def add_entry(self, value):
         self.values[value] += 1

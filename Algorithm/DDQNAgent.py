@@ -53,6 +53,7 @@ class DDQNAgent(DQNAgent):
 
     def load_model(self, rollout=1):
         self.network.load('%s/models/model_%d.h5' % (self.name, rollout))
+        # self.network.load('%s/models/model_2.h5' % (self.name))
         self.target_network.load('%s/models/model_target_%d.h5' % (self.name, rollout))
 
     def _reset_target_network(self):

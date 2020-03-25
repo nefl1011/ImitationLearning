@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
         writer = csv.writer(target_file)
         for i in range(start, until):
-            with open(path + "agent_actions%d.csv" % i, "r") as values:
+            with open(path + "agent_actions_2%d.csv" % i, "r") as values:
                 reader = csv.reader(values)
                 data = list(reader)
                 results = []

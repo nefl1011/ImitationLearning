@@ -1,3 +1,5 @@
+import time
+
 import gym
 import numpy as np
 from PIL import Image
@@ -27,15 +29,14 @@ def run_agent(agent, env):
         done = False
         while not done:
             action = agent.get_action(current_state)
-            print(action)
+            # print(action)
             obs, r, done, info = step(env, action, agent)
 
             next_state = np.asarray([[current_state[0][1], current_state[0][2], current_state[0][3], obs]])
 
             current_state = next_state
             reward += r
-
-        print(reward)
+            # time.sleep(0.005)
 
 
 
@@ -59,17 +60,15 @@ def main(args):
     rollout_max = 11
 
     agent = DDQNAgent(input_shape,
-                      env.action_space.n,
+                      6,
                       discount_factor,
                       replay_buffer,
                       minibatch_size,
                       logger,
                       mode)
 
-    for i in range(59, 60):
-        agent.load_model(rollout=258)
-        print("current iteration: %d" % i)
-        run_agent(agent, env)
+    agent.load_model(rollout=485)
+    run_agent(agent, env)
 
 
 if __name__ == '__main__':

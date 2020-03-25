@@ -29,7 +29,7 @@ def step(env, action, agent):
     total_reward = 0.0
     done = False
     for i in range(skip_frame_rate):
-        # window_still_open = env.render()
+        window_still_open = env.render()
         # if not window_still_open:
             # sys.exit("Exit")
 
@@ -86,7 +86,7 @@ def main(args):
     replay_memory_size = args.replay_memory_size
     img_size = (84, 84)
     skip_frame_rate = args.skip_frame_rate
-    mode = 'conf_dagger'
+    mode = 'ddqn'
 
     logger = Logger(args.atari_game, "data/%s/log/agent_actions_2/" % mode)
     replay_buffer = ReplayBuffer(replay_memory_size, minibatch_size)
@@ -99,10 +99,11 @@ def main(args):
                       logger,
                       mode)
 
-    for i in range(132, 262):
-        agent.load_model(rollout=i)
-        print("current iteration: %d" % i)
-        evaluate_agent(agent, env, logger)
+    for i in range(1, 100000):
+        if i == 1 or i == 58192 or i == 93562:
+            agent.load_model(rollout=i)
+            print("current iteration: %d" % i)
+            evaluate_agent(agent, env, logger)
 
 
 if __name__ == '__main__':
