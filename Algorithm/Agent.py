@@ -42,6 +42,9 @@ class Agent(ABC):
     def load_model(self, rollout=1):
         pass
 
+    def get_action_confidence(self, state):
+        self._get_action_confidence(state)
+
     def train(self, train_all=False):
         self._train(train_all=train_all)
         self.save_model()
@@ -85,7 +88,7 @@ class Agent(ABC):
         # t_dist = self._t_dist
         # dist = self.get_compared_distance(state)
         # print("Get action: %d with confidence: %f and distance: %f. t_conf is %f and t_dist is %f" % (action, conf, dist, t_conf, t_dist))
-        print("Get action: %d with confidence: %f. t_conf is %f" % (action, conf, t_conf))
+        # print("Get action: %d with confidence: %f. t_conf is %f" % (action, conf, t_conf))
         return t_conf <= conf  #  and t_dist > dist
 
     def get_t_conf(self):
@@ -129,3 +132,6 @@ class Agent(ABC):
 
     def set_tau_conf(self):
         self._t_conf = self.get_tau_confidence()
+
+    def set_tau_conf_2(self, t_conf):
+        self._t_conf = t_conf

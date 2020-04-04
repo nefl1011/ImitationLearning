@@ -22,7 +22,7 @@ class Logger:
         self.loss_critic = DoubleStats("rollouts", "loss_critic", RUN_UPDATE_FREQUENCY, directory_path, header)
         self.accuracy_critic = DoubleStats("rollouts", "accuracy_critic", RUN_UPDATE_FREQUENCY, directory_path, header)
         self.q = SimpleStats("rollout", "q", RUN_UPDATE_FREQUENCY, directory_path, header)
-        self.t_conf = SimpleStats("rollouts", "t_conf", RUN_UPDATE_FREQUENCY, directory_path, header)
+        self.t_conf = SimpleStats("rollouts", "t_conf_2", RUN_UPDATE_FREQUENCY, directory_path, header)
         self.reward = Boxplotcurve("rollouts", "reward", TRAINING_UPDATE_FREQUENCY, directory_path, header)
         self.expert_action = StackedBarGraph("rollouts", "expert_actions", 18, directory_path, header)
         self.agent_action = BarGraph("rollouts", "agent_actions", 18, directory_path, header)

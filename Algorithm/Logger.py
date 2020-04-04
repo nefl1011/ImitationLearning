@@ -2,7 +2,7 @@ import csv
 import os
 import shutil
 
-from Statistic import Statistic, Boxplotcurve, DoubleStats, SimpleStats, StackedBarGraph, BarGraph
+from Statistic import Statistic, Boxplotcurve, DoubleStats, SimpleStats, StackedBarGraph, BarGraph, SimpleStatsSec
 
 MAX_LOSS = 5
 RUN_UPDATE_FREQUENCY = 1
@@ -27,6 +27,7 @@ class Logger:
         self.expert_action = StackedBarGraph("rollouts", "expert_actions", 18, directory_path, header)
         self.agent_action = BarGraph("rollouts", "agent_actions", 18, directory_path, header)
         self.t_dist = SimpleStats("rollouts", "t_dist", RUN_UPDATE_FREQUENCY, directory_path, header)
+        self.t = SimpleStatsSec("rollouts", "t", RUN_UPDATE_FREQUENCY, directory_path, header)
 
     def add_score(self, score):
         self.score.add_entry(score)
@@ -56,6 +57,9 @@ class Logger:
     def add_t_conf(self, t_conf):
         self.t_conf.add_entry(t_conf)
 
+    def add_t(self, t):
+        self.t.add_entry(t)
+
     def add_t_dist(self, t_dist):
         self.t_dist.add_entry(t_dist)
 
@@ -73,6 +77,12 @@ class Logger:
 
     def save_agent_action(self):
         self.agent_action.save()
+
+    def save_t(self):
+        self.t.save()
+
+    def reset_t(self):
+        self.t.val = 0
 
     def save_agent_action_avg_std(self):
         self.agent_action.save_avg_std()

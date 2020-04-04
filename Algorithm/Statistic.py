@@ -40,6 +40,30 @@ class Statistic(ABC):
             writer.writerow(score)
 
 
+class SimpleStatsSec(Statistic):
+    def __init__(self, x_label, y_label, update_frequency, directory_path, header):
+        super(SimpleStatsSec, self).__init__(
+            x_label,
+            y_label,
+            update_frequency,
+            directory_path,
+            header)
+        self.val = 0
+        self.roll = 0
+
+    def add_entry(self, value):
+        self.val += value
+        self.roll += 1
+
+    def save(self):
+        self._save_csv(self.directory_path + self.y_label + ".csv", [self.val, self.roll])
+        self.val = 0
+        self.roll = 0
+
+    def _save_png(self, input_path, output_path, small_batch_length, big_batch_length, x_label, y_label):
+        pass
+
+
 class SimpleStats(Statistic):
     def __init__(self, x_label, y_label, update_frequency, directory_path, header):
         super(SimpleStats, self).__init__(
